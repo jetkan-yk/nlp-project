@@ -60,6 +60,30 @@ The dataset is organized as follows:
         │   └── ...                                    # there are K articles annotated for each task, so this repeats for the remaining K-1 annotated articles
         └── ...                                        # if there are N task folders overall, then this repeats N-1 more times
 
+## Resources
+
+### Official Links
+
+CodaLab Competition [Website](https://competitions.codalab.org/competitions/25680)
+
+NCG Task [Paper](https://arxiv.org/pdf/2106.07385.pdf) [GitHub](https://github.com/ncg-task?tab=repositories)
+
+### Participating Teams
+
+1. ITNLP [Paper](https://aclanthology.org/2021.semeval-1.59.pdf) [GitHub](https://github.com/itnlp606/nlpcb-graph)
+
+2. UIUC_BioNLP [Paper](https://arxiv.org/pdf/2105.05435.pdf) [GitHub](https://github.com/Liu-Hy/nlp-contrib-graph)
+
+3. IITK [Paper](https://arxiv.org/pdf/2104.01619.pdf) [GitHub](https://github.com/sshailabh/SemEval-2021-Task-11)
+
+4. ECNUICA [Paper](https://aclanthology.org/2021.semeval-1.185.pdf)
+
+5. INNOVATORS [Paper](https://aclanthology.org/2021.semeval-1.61.pdf) [GitHub](https://github.com/HardikArora17/)
+
+6. Duluth [Paper](https://aclanthology.org/2021.semeval-1.60.pdf) [GitHub](https://github.com/anmartin94/DuluthSemEval2021Task11)
+
+7. YNU-HPCC [Paper](https://aclanthology.org/2021.semeval-1.58.pdf) [GitHub](https://github.com/maxinge8698/SemEval2021-Task11)
+
 ## Project Requirement
 
 The breakdown of the final project marks will be according to the following criteria:
