@@ -23,13 +23,13 @@
 
 These flags can be combined into one single command line:
 
-- Use `--data [data-folder/]` to specify which dataset folder to use
-- Use `--model [model-file]` to specify the model filename to generate and use
-- Use `--summary [summary-file]` to specify the summary filename to generate
+- Use `-d [dataset_path/]` to specify which dataset folder to use
+- Use `-m [model_name]` to specify the model filename (without file extension) to generate and use
+- Use `-s [summary_name]` to specify the summary filename (without file extension) to generate
 
 #### Example
 
-`python3 main.py 1 --data data-small/ --model bert.pkl --summary bert.txt`
+`python3 main.py 1 -d data-small/ -m sci-bert -s test1`
 
 ## Project Structure
 
