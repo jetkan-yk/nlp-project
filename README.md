@@ -1,5 +1,36 @@
 # CS4248 G17 NLP Project
 
+## Guide
+
+### Dependencies
+
+- [Python 3.x](https://www.python.org/downloads/)
+- [PyTorch](https://pytorch.org/get-started/locally/)
+
+### How To Run
+
+1. Make sure you have installed all the dependencies mentioned above
+2. Clone or download this repository, then open a terminal and navigate to this folder
+3. Train, test & evaluate the model by running `python3 main.py [1 | 2]` which performs these actions on `subtask 1 or 2`:
+   1. Load all dataset from the `data/` folder
+   2. Randomly split the dataset into training & testing set
+   3. Generate `answer.txt` for the expected answer of testing set
+   4. Train the model and store in the `model.pkl` model file
+   5. Test the model and generate `output.txt` output file
+   6. Evaluate the test output and generate `summary.txt` summary file
+
+### Useful flags
+
+These flags can be combined into one single command line:
+
+- Use `--data [data-folder/]` to specify which dataset folder to use
+- Use `--model [model-file]` to specify the model filename to generate and use
+- Use `--summary [summary-file]` to specify the summary filename to generate
+
+#### Example
+
+`python3 main.py 1 --data data-small/ --model bert.pkl --summary bert.txt`
+
 ## Project Structure
 
 ### Dataset
