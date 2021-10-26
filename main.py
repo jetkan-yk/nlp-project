@@ -4,9 +4,28 @@ Usage: python3 main.py [subtask] [-d dataset_path] [-m model_name] [-s summary_n
 
 import argparse
 
+subtask = None
+
+
+def load_data(dataset_path):
+    raise NotImplementedError
+
+
+def train_model(model_name):
+    raise NotImplementedError
+
+
+def test_model(model_name):
+    raise NotImplementedError
+
+
+def evaluate(summary_name):
+    raise NotImplementedError
+
 
 def main(args):
-    print(args)
+    global subtask
+    subtask = args.subtask
 
 
 def parse_args():
