@@ -3,29 +3,23 @@ Usage: python3 main.py [subtask] [-d dataset_path] [-m model_name] [-s summary_n
 """
 
 import argparse
-
-subtask = None
-
-
-def load_data(dataset_path):
-    raise NotImplementedError
+import torch
 
 
-def train_model(model_name):
-    raise NotImplementedError
-
-
-def test_model(model_name):
-    raise NotImplementedError
-
-
-def evaluate(summary_name):
-    raise NotImplementedError
+class Dataset:
+    def __init__(self, subtask, dataset_path):
+        pass
 
 
 def main(args):
-    global subtask
-    subtask = args.subtask
+    if torch.cuda.is_available():
+        device_str = "cuda"
+    else:
+        device_str = "cpu"
+    device = torch.device(device_str)
+
+    dataset = Dataset(args.subtask, args.data)
+    # model = Model(args.subtask).to(device)
 
 
 def parse_args():
