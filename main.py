@@ -5,9 +5,12 @@ Usage: python3 main.py [subtask] [-d data_dir] [-m model_name] [-s summary_name]
 import argparse
 
 import torch
+from torch.utils.data.dataset import random_split
 
 from data import NcgDataset
 from model import NcgModel
+
+TRAIN_RATIO = 0.8
 
 
 def main(args):
@@ -18,7 +21,6 @@ def main(args):
     device = torch.device(device_str)
 
     dataset = NcgDataset(args.subtask, args.d)
-    # TODO: train test split
     train_data, test_data = train_test_split(dataset)
 
     model = NcgModel(args.subtask).to(device)
@@ -28,7 +30,13 @@ def main(args):
 
 
 def train_test_split(dataset):
-    raise NotImplementedError
+    """
+    Returns 2 randomly split training and testing dataset
+    """
+    train_size = int(len(dataset) * TRAIN_RATIO)
+    test_size = len(dataset) - train_size
+
+    return random_split(dataset, [train_size, test_size])
 
 
 def parse_args():
