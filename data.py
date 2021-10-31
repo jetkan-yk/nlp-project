@@ -94,13 +94,13 @@ class NcgDataset(Dataset):
         self.names, self.articles, self.sents, self.phrases = load_data(data_dir)
 
         if self.subtask == 1:
-            self.init_subtask1()
+            self._init_subtask1()
         elif self.subtask == 2:
-            self.init_subtask2()
+            self._init_subtask2()
         else:
             raise KeyError
 
-    def init_subtask1(self):
+    def _init_subtask1(self):
         """
         Initializes the dataset for subtask 1
         """
@@ -111,7 +111,7 @@ class NcgDataset(Dataset):
                 self.x.append(idx)
                 self.y.append((idx, sent))
 
-    def init_subtask2(self):
+    def _init_subtask2(self):
         """
         Initializes the dataset for subtask 2
         """
@@ -132,9 +132,9 @@ class NcgDataset(Dataset):
         """
         Returns the i-th sample's `(x, y)` tuple.
         """
-        return self.stringify(self.x[i]), self.stringify(self.y[i])
+        return self._stringify(self.x[i]), self._stringify(self.y[i])
 
-    def stringify(self, data):
+    def _stringify(self, data):
         """
         Converts the article or sentence index into `string`
         """
