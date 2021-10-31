@@ -7,14 +7,15 @@
 The [SemEval-2021 Shared Task NLP CONTRIBUTION GRAPH](https://competitions.codalab.org/competitions/25680) (a.k.a. ‘the NCG task’) tasks participants to develop
 automated systems that structure contributions from NLP scholarly articles in English.
 
-#### Input
+#### Subtask 1
 
-A set of research articles in plaintext format
+**Input:** a research article in plaintext format \
+**Output:** a set of contributing sentences
 
-#### Output
+#### Subtask 2
 
-1. A set of contributing sentences
-2. A set of scientific knowledge terms and predicates from the contributing sentences
+**Input:** a contributing sentence \
+**Output:** a set of scientific knowledge terms and predicate phrases
 
 ## Guide
 
@@ -52,6 +53,7 @@ These flags can be combined into one single command line:
 
 - `main.py` - main runner file of the project
 - `data.py` - loads, pre-processes data and implements the `NcgDataset` class
+- `model.py` - implements the `NcgModel` class
 - `subtask1/` - subtask 1 implementations
 - `subtask2/` - subtask 2 implementations
 - `documentation/` - written reports
