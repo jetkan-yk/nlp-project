@@ -1,4 +1,3 @@
-from collections import Counter
 import os
 
 
@@ -50,8 +49,3 @@ def load_task_names(folder_dir):
         tasks.append(dirpath)
 
     return tasks
-
-
-if __name__ == "__main__":
-    load_data("data-mini")
-    load_task_names("data-small")
