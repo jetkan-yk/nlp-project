@@ -30,10 +30,9 @@ A set of research articles in plaintext format
 3. Train, test & evaluate the model by running `python3 main.py [1 | 2]` which performs these actions on `subtask 1 or 2`:
    1. Load all data from the `data/` folder
    2. Randomly split the dataset into training & testing set
-   3. Generate `answer.txt` for the expected answer of testing set
-   4. Train the model and store in the `model.pkl` model file
-   5. Test the model and generate `output.txt` output file
-   6. Evaluate the test output and generate `summary.txt` summary file
+   3. Train the model and store in the `model` file
+   4. Test the model and generate an `output` file
+   5. Evaluate the test output and generate a `summary` file
 
 ### Useful flags
 
