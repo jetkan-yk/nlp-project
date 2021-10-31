@@ -3,9 +3,11 @@ Usage: python3 main.py [subtask] [-d data_dir] [-m model_name] [-s summary_name]
 """
 
 import argparse
+
 import torch
 
 from data import NcgDataset
+from model import NcgModel
 
 
 def main(args):
@@ -15,11 +17,24 @@ def main(args):
         device_str = "cpu"
     device = torch.device(device_str)
 
-    dataset = NcgDataset(args.subtask, args.data)
-    # model = Model(args.subtask).to(device)
+    dataset = NcgDataset(args.subtask, args.d)
+    # TODO: train test split
+    train_data, test_data = train_test_split(dataset)
+
+    model = NcgModel(args.subtask).to(device)
+    model.train(train_data, device, args.m)
+    model.test(test_data, device)
+    model.eval(args.s)
+
+
+def train_test_split(dataset):
+    raise NotImplementedError
 
 
 def parse_args():
+    """
+    Parses the `main.py` inputs
+    """
     parser = argparse.ArgumentParser()
 
     parser.add_argument("subtask", choices=[1, 2], type=int, help="choose subtask")
