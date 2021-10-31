@@ -1,9 +1,11 @@
 import os
 
+from torch.utils.data import Dataset
 
-def load_data(folder_dir):
+
+def load_data(data_dir):
     """
-    Loads dataset from directory `folder_dir` and returns a tuple `(text, label)`. \\
+    Loads dataset from directory `data_dir` and returns a tuple `(text, label)`. \\
     Both `text` and `label` are a `list` of `N` items, where `N` is the number of samples in the 
     dataset.
 
@@ -13,7 +15,7 @@ def load_data(folder_dir):
     texts = []
     labels = []
 
-    for dirpath, dirnames, filenames in os.walk(folder_dir):
+    for dirpath, dirnames, filenames in os.walk(data_dir):
         if dirnames != ["info-units", "triples"]:
             continue
 
@@ -35,13 +37,13 @@ def load_data(folder_dir):
     return texts, labels
 
 
-def load_task_names(folder_dir):
+def load_task_names(data_dir):
     """
-    Loads dataset from directory `folder_dir` and returns a list of task names.
+    Loads dataset from directory `data_dir` and returns a list of task names.
     """
     tasks = []
 
-    for dirpath, dirnames, _ in os.walk(folder_dir):
+    for dirpath, dirnames, _ in os.walk(data_dir):
         if dirnames != ["info-units", "triples"]:
             continue
 
@@ -49,3 +51,22 @@ def load_task_names(folder_dir):
         tasks.append(dirpath)
 
     return tasks
+
+
+class NcgDataset(Dataset):
+    """
+    A PyTorch Dataset class that accepts a data directory.
+
+    - task_names: maps the dataset sample id to its corresponding task name, e.g. `data/constituency_parsing/0`
+    - texts: preprocessed NLP scholarly article plaintext
+    - labels: contributing sentence ids
+    """
+
+    def __init__(self, data_dir):
+        raise NotImplementedError
+
+    def __len__(self):
+        raise NotImplementedError
+
+    def __get_item__(self, i):
+        raise NotImplementedError

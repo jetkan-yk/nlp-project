@@ -1,14 +1,11 @@
 """
-Usage: python3 main.py [subtask] [-d dataset_path] [-m model_name] [-s summary_name]
+Usage: python3 main.py [subtask] [-d data_dir] [-m model_name] [-s summary_name]
 """
 
 import argparse
 import torch
 
-
-class Dataset:
-    def __init__(self, subtask, dataset_path):
-        pass
+from data import NcgDataset
 
 
 def main(args):
@@ -18,7 +15,7 @@ def main(args):
         device_str = "cpu"
     device = torch.device(device_str)
 
-    dataset = Dataset(args.subtask, args.data)
+    dataset = NcgDataset(args.subtask, args.data)
     # model = Model(args.subtask).to(device)
 
 
@@ -26,7 +23,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("subtask", choices=[1, 2], type=int, help="choose subtask")
-    parser.add_argument("-d", default="data", type=str, help="specify dataset path")
+    parser.add_argument("-d", default="data", type=str, help="specify dataset directory")
     parser.add_argument("-m", default="model", type=str, help="specify model name")
     parser.add_argument("-s", default="summary", type=str, help="specify summary name")
 

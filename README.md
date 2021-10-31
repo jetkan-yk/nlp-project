@@ -23,7 +23,7 @@
 
 These flags can be combined into one single command line:
 
-- Use `-d [dataset_path/]` to specify which dataset folder to use
+- Use `-d [data_dir/]` to specify which dataset folder to use
 - Use `-m [model_name]` to specify the model filename (without file extension) to generate and use
 - Use `-s [summary_name]` to specify the summary filename (without file extension) to generate
 
