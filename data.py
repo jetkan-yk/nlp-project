@@ -2,129 +2,125 @@
 Loads dataset, preprocesses data and implements the NcgDataset class
 """
 
+from collections import defaultdict
 import os
 
-import torch
 from torch.utils.data import Dataset
-
-
-def load_task_names(data_dir):
-    """
-    Loads dataset from directory `data_dir` and returns a list of task names.
-    """
-    tasks = []
-
-    for dirpath, dirnames, _ in os.walk(data_dir):
-        if dirnames != ["info-units", "triples"]:
-            continue
-
-        # Currently located in task folder
-        tasks.append(dirpath)
-
-    return tasks
 
 
 def load_data(data_dir):
     """
-    Loads dataset from directory `data_dir` and returns a tuple `(text, label)`. \\
-    Both `text` and `label` are a list of `N` items, where `N` is the number of samples in the 
-    dataset.
+    Loads dataset from directory `data_dir` and returns a tuple of
+    `(names, articles, sents, phrases)`.
 
-    For each sample:
-    - a `text` item is a list of sentences (one sentence is a list of `string` words), the 
-    preprocessed NLP scholarly article plaintext
-    - a `label` item is a list of sentence ids in `torch.int`, the contributing sentence ids
+    - `names` maps the sample id to the sample's folder name, e.g. `data/constituency_parsing/0`
+    - `articles` maps the sample id to a list of sentences (each sentence is tokenized into a list
+    of `string` words), the preprocessed NLP scholarly article plaintext
+    - `sents` maps the sample id to a list of contributing sentence ids (0-indexed)
+    - `phrases` maps the sample id to a `dict` of `{sents: phrases}` (each phrase is a list of `string`
+    words), the scientific terms and relational cue phrases extracted from the contributing sentences
     """
-    texts = []
-    labels = []
+    names = []
+    articles = []
+    sents = []
+    phrases = []
 
     for dirpath, dirnames, filenames in os.walk(data_dir):
         if dirnames != ["info-units", "triples"]:
             continue
 
         # Currently located in task folder
+        names.append(dirpath)
+
         for filename in filenames:
-            # Load text
+            # Load article
             if filename.endswith("-Stanza-out.txt"):
                 with open(os.path.join(dirpath, filename)) as f:
-                    text_str_list = f.read().splitlines()
-                    text = parse_text(text_str_list)
-                    texts.append(text)
+                    art_str_list = f.read().splitlines()
+                    article = parse_article(art_str_list)
+                    articles.append(article)
 
-            # Load label
+            # Load contributing sentence id
             if filename == "sentences.txt":
                 with open(os.path.join(dirpath, filename)) as f:
-                    label_str_list = f.read().splitlines()
-                    label = parse_label(label_str_list)
-                    labels.append(label)
+                    sent_str_list = f.read().splitlines()
+                    sent = parse_sent(sent_str_list)
+                    sents.append(sent)
 
-    return texts, labels
+            # Load phrase
+            if filename == "entities.txt":
+                with open(os.path.join(dirpath, filename)) as f:
+                    phrase_str_list = f.read().splitlines()
+                    phrase = parse_phrase(phrase_str_list)
+                    phrases.append(phrase)
+
+    return names, articles, sents, phrases
 
 
-def parse_text(text_str_list: list[str]):
+def parse_article(art_str_list: list[str]):
     """
-    Parses a list of `string` sentences into a list of list of `string` words.
+    Parses a list of `string` from article plaintext into a list of list of `string` words.
     """
     # TODO: perform extra word token preprocessing here if required
-    return list(map(lambda text_str: text_str.split(" "), text_str_list))
+    # return list(map(lambda art_str: art_str.split(" "), art_str_list))
+    return art_str_list
 
 
-def parse_label(label_str_list: list[str]):
+def parse_sent(sent_str_list: list[str]):
     """
-    Parses a list of `string` labels into a list of `torch.int`.
-
-    Note: labels are 0-indexed
+    Parses a list of `string` contributing sentence ids into a list of `int`.
     """
-    return torch.tensor(
-        sorted(map(lambda label_str: int(label_str) - 1, label_str_list))
-    )
+    return sorted(map(lambda sent_str: int(sent_str) - 1, sent_str_list))
+
+
+def parse_phrase(phrase_str_list: list[str]):
+    """
+    Parses a list of `string` phrases into a `dict` that maps the contributing sentence id
+    to a list of `string` phrase.
+    """
+    phrase_list = map(lambda phrase_str: phrase_str.split("\t", 4), phrase_str_list)
+
+    phrases = defaultdict(list)
+    for row in phrase_list:
+        sent = row[0]
+        phrase = row[3]
+        phrases[sent].append(phrase)
+    return phrases
 
 
 class NcgDataset(Dataset):
     """
     A `PyTorch Dataset` class that accepts a subtask number and a data directory.
-
-    - `self.task_names`: maps all `N` dataset sample ids to their corresponding task names, e.g.
-    `data/constituency_parsing/0`
-    - `self.texts`: `N` lists of preprocessed NLP scholarly article plaintext
-    - `self.labels`: `N` lists of contributing sentence ids
     """
 
     def __init__(self, subtask, data_dir):
         self.subtask = subtask
-        self.task_names = load_task_names(data_dir)
-        self.texts, self.labels = load_data(data_dir)
+        self.names, self.articles, self.sents, self.phrases = load_data(data_dir)
 
     def __len__(self):
         """
         Returns the number of samples in the dataset.
         """
-        return len(self.texts)
+        return len(self.names)
 
     def __getitem__(self, i):
         """
-        Returns the i-th sample's `(text, label)` tuple.
-
-        - `text` is a list of `string`
-        - `label` is a `torch.int`
+        Returns the i-th sample's `(x, y)` tuple.
         """
         if self.subtask == 1:
-            text = self.texts[i]
-            label = self.labels[i]
+            return self.articles[i], self.sents[i]
         elif self.subtask == 2:
-            text = None
-            label = None
+            return self.sents[i], self.phrases[i]
         else:
             raise KeyError
-
-        return text, label
 
 
 if __name__ == "__main__":
     # Example use case
-    dataset = NcgDataset(subtask=1, data_dir="data-mini")
+    dataset1 = NcgDataset(subtask=1, data_dir="data-mini")
+    for d in dataset1:
+        print(f"Input: {d[0]}\nOutput: {d[1]}")
 
-    for text, label in dataset:
-        for i in label:
-            # print all contributing sentences
-            print(text[i])
+    dataset2 = NcgDataset(subtask=1, data_dir="data-mini")
+    for d in dataset2:
+        print(f"Input: {d[0]}\nOutput: {d[1]}")
