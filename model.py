@@ -18,10 +18,12 @@ LEARNING_RATE = 0.3
 MOMENTUM = 0.8
 EPOCHS = 30
 
+# TODO: do proof of concept using a2 dataset and model
+
 
 class NcgModel:
     """
-    A model interface that is powered by a `PyTorch nn.Module` subclass.
+    A model class that is powered by a `PyTorch nn.Module` subclass.
     """
 
     def __init__(self, subtask, device):
@@ -131,4 +133,5 @@ def summarize(subtask, verdicts, summary_name):
 
     print(f"Summary generated in {summary_path}")
 
+    # TODO: Implement summarizer
     raise NotImplementedError

@@ -23,6 +23,7 @@ def collator2(batch):
     """
     Collate function for DataLoader
     """
+    # TODO: Implement collator here
     raise NotImplementedError
 
 
@@ -30,4 +31,5 @@ def evaluator2(preds, labels):
     """
     Evaluates the predicted results against the expected labels
     """
+    # TODO: Implement evaluator here
     raise NotImplementedError
