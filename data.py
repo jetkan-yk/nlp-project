@@ -11,15 +11,13 @@ from torch.utils.data import Dataset
 
 def load_data(data_dir):
     """
-    Loads dataset from directory `data_dir` and returns a tuple of
-    `(names, articles, sents, phrases)`.
+    Loads dataset from directory `data_dir` and returns a tuple of `(names, articles, sents, phrases)`.
 
-    - `names` maps the sample id to the sample's folder name, e.g. `data/constituency_parsing/0`
-    - `articles` maps the sample id to a list of sentences, the NLP scholarly article plaintext
-    - `sents` maps the sample id to a list of contributing sentence ids (0-indexed)
-    - `phrases` maps the sample id to a `dict` of `{sents: phrases}` (each phrase is a list of
-    `string`), the scientific terms and relational cue phrases extracted from the contributing
-    sentences
+    - `names` the sample's folder name, e.g. `data/constituency_parsing/0`
+    - `articles` the NLP scholarly article plaintext, each article is a list of `string`
+    - `sents` a list of contributing sentence ids (0-indexed)
+    - `phrases` the scientific terms and relational cue phrases extracted from the contributing
+    sentences, each entry is a `dict` of `{sents: phrases}` (each phrase is a list of `string`),
     """
     names = []
     articles = []
@@ -59,24 +57,24 @@ def load_data(data_dir):
 
 def parse_sent(sent_str_list: list[str]):
     """
-    Parses a list of `string` contributing sentence ids into a list of `int`.
+    Parses a list of `string` contributing sentence ids to a list of `int`, 0-indexed.
     """
     return sorted(map(lambda sent_str: int(sent_str) - 1, sent_str_list))
 
 
 def parse_phrase(phrase_str_list: list[str]):
     """
-    Parses a list of `string` phrases into a `dict` that maps the contributing sentence id
+    Parses a list of `string` phrase list into a `dict` that maps the contributing sentence id
     to a list of `string` phrase.
     """
     phrase_list = map(lambda phrase_str: phrase_str.split("\t", 4), phrase_str_list)
 
-    phrases = defaultdict(list)
+    phrase_dict = defaultdict(list)
     for row in phrase_list:
         sent = int(row[0]) - 1
-        phrase = row[3]
-        phrases[sent].append(phrase)
-    return phrases
+        phrase = row[-1]
+        phrase_dict[sent].append(phrase)
+    return phrase_dict
 
 
 class NcgDataset(Dataset):
@@ -92,62 +90,55 @@ class NcgDataset(Dataset):
         y = a list of phrases (a list of strings)
     """
 
-    def init_subtask1(self):
-        raise NotImplementedError
-
-    def init_subtask2(self):
-        raise NotImplementedError
-
     def __init__(self, subtask, data_dir):
         self.subtask = subtask
-        self.names, self.articles, sents, phrases = load_data(data_dir)
+        self.names, self.articles, self.sents, self.phrases = load_data(data_dir)
 
-        # helper for y of subtask 1
-        self.y1 = []  # (sample, sent_id)
-        for sample, sent_ids in enumerate(sents):
-            for sent_id in sent_ids:
-                self.y1.append((sample, sent_id))
+        if self.subtask == 1:
+            self.init_subtask1()
+        elif self.subtask == 2:
+            self.init_subtask2()
+        else:
+            raise KeyError
 
-        # helper for x, y of subtask 2
-        self.x2 = []  # (sample, sent_id)
-        self.y2 = []  # phrase
-        for sample, phrase_dict in enumerate(phrases):
-            for sent_id, phrase in phrase_dict.items():
-                self.x2.append((sample, sent_id))
-                self.y2.append(phrase)
+    def init_subtask1(self):
+        """
+        Initializes the dataset for subtask 1
+        """
+        self.x = []
+        self.y = []
+        for idx, sent_list in enumerate(self.sents):
+            for sent in sent_list:
+                self.x.append(idx)
+                self.y.append((idx, sent))
+
+    def init_subtask2(self):
+        """
+        Initializes the dataset for subtask 2
+        """
+        self.x = []
+        self.y = []
+        for idx, phrase_dict in enumerate(self.phrases):
+            for sent, phrase in phrase_dict.items():
+                self.x.append((idx, sent))
+                self.y.append(phrase)
 
     def __len__(self):
         """
         Returns the number of samples in the dataset.
         """
-        if self.subtask == 1:
-            return len(self.y1)
-        elif self.subtask == 2:
-            return len(self.y2)
-        else:
-            raise KeyError
-
-    def get_text(self, sample, sent=None):
-        raise NotImplementedError
+        return len(self.x)
 
     def __getitem__(self, i):
         """
         Returns the i-th sample's `(x, y)` tuple.
         """
-        if self.subtask == 1:
-            sample, sent_id = self.y1[i]
-            x = self.articles[sample]
-            y = self.articles[sample][sent_id]
+        return self.x[i], self.y[i]
 
-        elif self.subtask == 2:
-            sample, sent_id = self.x2[i]
-            x = self.articles[sample][sent_id]
-            y = self.y2[i]
-
-        else:
-            raise KeyError
-
-        return x, y
+    def stringify(self, data):
+        # TODO
+        # if isinstance(data)
+        raise NotImplementedError
 
 
 if __name__ == "__main__":
