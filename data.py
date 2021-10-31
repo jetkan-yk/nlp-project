@@ -73,7 +73,7 @@ def parse_phrase(phrase_str_list: list[str]):
 
     phrases = defaultdict(list)
     for row in phrase_list:
-        sent = int(row[0])
+        sent = int(row[0]) - 1
         phrase = row[3]
         phrases[sent].append(phrase)
     return phrases
