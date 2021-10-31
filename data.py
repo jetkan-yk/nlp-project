@@ -1,5 +1,10 @@
+"""
+Loads dataset, preprocesses data and implements the NcgDataset class
+"""
+
 import os
 
+from torch import Tensor
 from torch.utils.data import Dataset
 
 
@@ -9,8 +14,9 @@ def load_data(data_dir):
     Both `text` and `label` are a `list` of `N` items, where `N` is the number of samples in the 
     dataset.
 
-    - Each `text` item is a `list` of sentences, the preprocessed NLP scholarly article plaintext
-    - Each `label` item is a `list` of 0-indexed sentence ids, the contributing sentence ids
+    For each sample:
+    - a `text` item is a `list` of sentences, the preprocessed NLP scholarly article plaintext
+    - a `label` item is a `list` of 0-indexed sentence ids, the contributing sentence ids
     """
     texts = []
     labels = []
@@ -53,20 +59,56 @@ def load_task_names(data_dir):
     return tasks
 
 
+def tokenize(sentence):
+    """
+    Tokenizes a sentence string into a list of word string
+    """
+    raise NotImplementedError
+
+
+def parse(word):
+    """
+    Parses a word string into a torch.int type
+    """
+    raise NotImplementedError
+
+
 class NcgDataset(Dataset):
     """
-    A PyTorch Dataset class that accepts a data directory.
+    A `PyTorch Dataset` class that accepts a data directory.
 
-    - task_names: maps the dataset sample id to its corresponding task name, e.g. `data/constituency_parsing/0`
-    - texts: preprocessed NLP scholarly article plaintext
-    - labels: contributing sentence ids
+    - `self.task_names`: maps all `N` dataset sample ids to their corresponding task names, e.g. `data/constituency_parsing/0`
+    - `self.texts`: `N` lists of preprocessed NLP scholarly article plaintext
+    - `self.labels`: `N` lists of contributing sentence ids
+
+    For each sample:
+    - a `text` item is a `list` of sentences, the preprocessed NLP scholarly article plaintext
+    - a `label` item is a `list` of 0-indexed sentence ids, the contributing sentence ids
     """
 
     def __init__(self, data_dir):
-        raise NotImplementedError
+        self.task_names = load_task_names(data_dir)
+        self.texts, self.labels = load_data(data_dir)
 
     def __len__(self):
-        raise NotImplementedError
+        """
+        Returns the number of samples in the dataset.
+        """
+        return len(self.texts)
 
-    def __get_item__(self, i):
-        raise NotImplementedError
+    def __getitem__(self, i):
+        """
+        Returns the i-th sample's `(text, label)` tuple.
+        """
+        text = self.texts[i]
+        label = self.labels[i]
+
+        return text, label
+
+
+if __name__ == "__main__":
+    dataset = NcgDataset("data-small")
+    for text, label in dataset:
+        for t in text:
+            print(t)
+        print(label)
