@@ -16,4 +16,18 @@ class Model2(nn.Module):
 
     def forward(self, x):
         # TODO: Implement forward here
-        pass
+        raise NotImplementedError
+
+
+def collator2(batch):
+    """
+    Collate function for DataLoader
+    """
+    raise NotImplementedError
+
+
+def evaluator2(preds, labels):
+    """
+    Evaluates the predicted results against the expected labels
+    """
+    raise NotImplementedError

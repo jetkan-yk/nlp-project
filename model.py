@@ -9,8 +9,8 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from subtask1.model1 import Model1
-from subtask2.model2 import Model2
+from subtask1.model1 import Model1, collator1, evaluator1
+from subtask2.model2 import Model2, collator2, evaluator2
 
 # Hyperparameters
 BATCH_SIZE = 20
@@ -30,8 +30,12 @@ class NcgModel:
 
         if self.subtask == 1:
             self.model = Model1().to(self.device)
+            self.collator = collator1
+            self.evaluator = evaluator1
         elif self.subtask == 2:
             self.model = Model2().to(self.device)
+            self.collator = collator2
+            self.evaluator = evaluator2
         else:
             raise KeyError
 
@@ -39,7 +43,12 @@ class NcgModel:
         """
         Trains the model using `train_data` and saves the model in `model_name`
         """
-        data_loader = DataLoader(train_data, BATCH_SIZE, shuffle=True)
+        data_loader = DataLoader(
+            train_data,
+            BATCH_SIZE,
+            shuffle=True,
+            collate_fn=self.collator,
+        )
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(self.model.parameters(), LEARNING_RATE, MOMENTUM)
 
@@ -78,31 +87,18 @@ class NcgModel:
                     )
                 running_loss = 0.0
         end = datetime.now()
-
-        # save model
-        NcgModel.save(self.subtask, self.model, model_name)
-
         print(f"Training finished in {(end - start).seconds / 60.0} minutes.")
 
-    def save(subtask, model: nn.Module, model_name):
-        """
-        Saves the model as `model_name` in the subtask folder.
-        """
-        checkpoint = model.state_dict()
-        model_path = os.path.join(f"subtask{subtask}", model_name)
-
-        torch.save(checkpoint, model_path)
-        print(f"Model saved in {model_path}")
+        save_model(self.subtask, self.model, model_name)
 
     def test(self, test_data, summary_name):
         """
         Tests the model using `test_data` and writes a summary file `summary_name`
         """
-        data_loader = DataLoader(test_data, BATCH_SIZE)
+        data_loader = DataLoader(test_data, BATCH_SIZE, collate_fn=self.collator)
         verdicts = []
 
         self.model.eval()
-
         with torch.no_grad():
             for data in data_loader:
                 features = data[0].to(self.device)
@@ -110,23 +106,29 @@ class NcgModel:
 
                 preds = self.model(features)
 
-                evaluation = NcgModel.evaluate(self.subtask, preds, labels)
+                evaluation = self.evaluator(preds, labels)
                 verdicts.append(evaluation)
 
-        NcgModel.summarize(self.subtask, verdicts, summary_name)
+        summarize(self.subtask, verdicts, summary_name)
 
-    def evaluate(subtask, preds, labels):
-        """
-        Evaluates the predicted results against the expected labels
-        """
-        raise NotImplementedError
 
-    def summarize(subtask, verdicts, summary_name):
-        """
-        Writes the summary file as `summary_name` in the subtask folder.
-        """
-        summary_path = os.path.join(f"subtask{subtask}", summary_name)
+def save_model(subtask, model: nn.Module, model_name):
+    """
+    Saves the model as `model_name` in the subtask folder.
+    """
+    checkpoint = model.state_dict()
+    model_path = os.path.join(f"subtask{subtask}", model_name)
 
-        print(f"Summary generated in {summary_path}")
+    torch.save(checkpoint, model_path)
+    print(f"Model saved in {model_path}")
 
-        raise NotImplementedError
+
+def summarize(subtask, verdicts, summary_name):
+    """
+    Writes the summary file as `summary_name` in the subtask folder.
+    """
+    summary_path = os.path.join(f"subtask{subtask}", summary_name)
+
+    print(f"Summary generated in {summary_path}")
+
+    raise NotImplementedError
