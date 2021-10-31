@@ -82,7 +82,7 @@ def parse_label(label_str_list: list[str]):
 
 class NcgDataset(Dataset):
     """
-    A `PyTorch Dataset` class that accepts a data directory.
+    A `PyTorch Dataset` class that accepts a subtask number and a data directory.
 
     - `self.task_names`: maps all `N` dataset sample ids to their corresponding task names, e.g.
     `data/constituency_parsing/0`
@@ -90,7 +90,8 @@ class NcgDataset(Dataset):
     - `self.labels`: `N` lists of contributing sentence ids
     """
 
-    def __init__(self, data_dir):
+    def __init__(self, subtask, data_dir):
+        self.subtask = subtask
         self.task_names = load_task_names(data_dir)
         self.texts, self.labels = load_data(data_dir)
 
@@ -105,17 +106,23 @@ class NcgDataset(Dataset):
         Returns the i-th sample's `(text, label)` tuple.
 
         - `text` is a list of `string`
-        - `label` is a list of `torch.int`
+        - `label` is a `torch.int`
         """
-        text = self.texts[i]
-        label = self.labels[i]
+        if self.subtask == 1:
+            text = self.texts[i]
+            label = self.labels[i]
+        elif self.subtask == 2:
+            text = None
+            label = None
+        else:
+            raise KeyError
 
         return text, label
 
 
 if __name__ == "__main__":
     # Example use case
-    dataset = NcgDataset("data-mini")
+    dataset = NcgDataset(subtask=1, data_dir="data-mini")
 
     for text, label in dataset:
         for i in label:
