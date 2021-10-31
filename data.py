@@ -133,12 +133,21 @@ class NcgDataset(Dataset):
         """
         Returns the i-th sample's `(x, y)` tuple.
         """
-        return self.x[i], self.y[i]
+        return self.stringify(self.x[i]), self.stringify(self.y[i])
 
     def stringify(self, data):
-        # TODO
-        # if isinstance(data)
-        raise NotImplementedError
+        """
+        Converts the article or sentence index into `string`
+        """
+        if isinstance(data, list):
+            return data
+        elif isinstance(data, tuple):
+            idx, sent = data
+            return self.articles[idx][sent]
+        elif isinstance(data, int):
+            return self.articles[data]
+        else:
+            raise KeyError
 
 
 if __name__ == "__main__":
