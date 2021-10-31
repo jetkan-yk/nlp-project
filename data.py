@@ -3,7 +3,6 @@ Loads dataset, pre-processes data and implements the NcgDataset class
 """
 
 import os
-import pprint
 from collections import defaultdict
 
 from torch.utils.data import Dataset
@@ -148,15 +147,3 @@ class NcgDataset(Dataset):
             return self.articles[data]
         else:
             raise KeyError
-
-
-if __name__ == "__main__":
-    # Example use case
-    dataset1 = NcgDataset(subtask=1, data_dir="data-mini")
-    for d in dataset1:
-        pprint.pp(d)
-
-    print("=============")
-    dataset2 = NcgDataset(subtask=2, data_dir="data-mini")
-    for d in dataset2:
-        pprint.pp(d)
