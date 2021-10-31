@@ -64,7 +64,9 @@ The dataset is organized as follows:
 
 ### Official Links
 
-CodaLab Competition [Website](https://competitions.codalab.org/competitions/25680)
+[Official Website](https://ncg-task.github.io/)
+
+[CodaLab Portal](https://competitions.codalab.org/competitions/25680)
 
 NCG Task [Paper](https://arxiv.org/pdf/2106.07385.pdf) [GitHub](https://github.com/ncg-task?tab=repositories)
 
