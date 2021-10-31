@@ -1,5 +1,5 @@
 """
-Loads dataset, preprocesses data and implements the NcgDataset class
+Loads dataset, pre-processes data and implements the NcgDataset class
 """
 
 import os
@@ -11,7 +11,7 @@ from torch.utils.data import Dataset
 
 def load_data(data_dir):
     """
-    Loads dataset from directory `data_dir` and returns a tuple of `(names, articles, sents, phrases)`.
+    Loads data from directory `data_dir` and returns a tuple of `(names, articles, sents, phrases)`.
 
     - `names` the sample's folder name, e.g. `data/constituency_parsing/0`
     - `articles` the NLP scholarly article plaintext, each article is a list of `string`

@@ -23,7 +23,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("subtask", choices=[1, 2], type=int, help="choose subtask")
-    parser.add_argument("-d", default="data", type=str, help="specify dataset directory")
+    parser.add_argument("-d", default="data", type=str, help="specify data directory")
     parser.add_argument("-m", default="model", type=str, help="specify model name")
     parser.add_argument("-s", default="summary", type=str, help="specify summary name")
 

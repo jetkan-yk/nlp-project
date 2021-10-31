@@ -1,10 +1,26 @@
 # CS4248 G17 NLP Project
 
+## About
+
+### Task Background (Information Extraction)
+
+The [SemEval-2021 Shared Task NLP CONTRIBUTION GRAPH](https://competitions.codalab.org/competitions/25680) (a.k.a. ‘the NCG task’) tasks participants to develop
+automated systems that structure contributions from NLP scholarly articles in English.
+
+#### Input
+
+A set of research articles in plaintext format
+
+#### Output
+
+1. A set of contributing sentences
+2. A set of scientific knowledge terms and predicates from the contributing sentences
+
 ## Guide
 
 ### Dependencies
 
-- [Python 3.x](https://www.python.org/downloads/)
+- [Python 3.8 or 3.9](https://www.python.org/downloads/)
 - [PyTorch](https://pytorch.org/get-started/locally/)
 
 ### How To Run
@@ -12,7 +28,7 @@
 1. Make sure you have installed all the dependencies mentioned above
 2. Clone or download this repository, then open a terminal and navigate to this folder
 3. Train, test & evaluate the model by running `python3 main.py [1 | 2]` which performs these actions on `subtask 1 or 2`:
-   1. Load all dataset from the `data/` folder
+   1. Load all data from the `data/` folder
    2. Randomly split the dataset into training & testing set
    3. Generate `answer.txt` for the expected answer of testing set
    4. Train the model and store in the `model.pkl` model file
@@ -33,16 +49,23 @@ These flags can be combined into one single command line:
 
 ## Project Structure
 
-### Dataset
+### General
 
-There are 2 dataset folders:
+- `main.py` - main runner file of the project
+- `data.py` - loads, pre-processes data and implements the `NcgDataset` class
+- `subtask1/` - subtask 1 implementations
+- `subtask2/` - subtask 2 implementations
+- `documentation/` - written reports
 
-1. `data/` contains 38 task folders
-2. `data-small/` a subset of `data/`, contains 5 task folders
+### Data
 
-The dataset is organized as follows:
+- `data/` - contains 38 task folders
+- `data-small/` - a subset of `data/`, contains 5 task folders
+- `data-mini/` - a subset of `data/`, contains 1 task folder
 
-    [task-name-folder]/                                # natural_language_inference, paraphrase_generation, question_answering, relation_extraction, topic_models
+The data folders is organized as follows:
+
+    [task-name-folder]/                                # natural_language_inference, paraphrase_generation, question_answering, relation_extraction, etc
         ├── [article-counter-folder]/                  # ranges between 0 to 100 since we annotated varying numbers of articles per task
         │   ├── [article-name].pdf                     # scholarly article pdf
         │   ├── [article-name]-Grobid-out.txt          # plaintext output from the [Grobid parser](https://github.com/kermitt2/grobid)
