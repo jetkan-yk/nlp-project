@@ -18,10 +18,9 @@ def main(args):
     train_data, test_data = train_test_split(dataset)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = NcgModel(args.subtask).to(device)
-    model.train(train_data, device, args.m)
-    model.test(test_data, device)
-    model.eval(args.s)
+    model = NcgModel(args.subtask, device)
+    model.train(train_data, args.m)
+    model.test(test_data, args.s)
 
 
 def train_test_split(dataset):
