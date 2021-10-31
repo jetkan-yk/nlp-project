@@ -14,15 +14,10 @@ TRAIN_RATIO = 0.8
 
 
 def main(args):
-    if torch.cuda.is_available():
-        device_str = "cuda"
-    else:
-        device_str = "cpu"
-    device = torch.device(device_str)
-
     dataset = NcgDataset(args.subtask, args.d)
     train_data, test_data = train_test_split(dataset)
 
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     model = NcgModel(args.subtask).to(device)
     model.train(train_data, device, args.m)
     model.test(test_data, device)
