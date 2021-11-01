@@ -91,6 +91,8 @@ The data folders is organized as follows:
 
 - `main` - root branch
 - `demo-a2` - a demo mode that emulates assignment 2's dataset & model
+- `subtask1` - development branch for subtask 1
+- `subtask2` - development branch for subtask 2
 
 ## Resources
 
