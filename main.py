@@ -1,6 +1,5 @@
 """
-main file only for demo purpose
-Usage: python3 main.py 0 [-d data_dir] [-m model_name] [-s summary_name]
+Usage: python3 main.py 0 [--train | --test] [-d data_dir] [-m model_name] [-s summary_name]
 """
 
 import argparse
@@ -22,8 +21,11 @@ def main(args):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = NcgModelDemo(args.subtask, device)
-    model.train(train_data, args.m)
-    model.test(test_data, args.s)
+
+    if args.train or args.train == args.test:
+        model.train(train_data, args.m)
+    if args.test or args.train == args.test:
+        model.test(test_data, args.s)
 
 
 def train_test_split(dataset):
@@ -45,7 +47,11 @@ def parse_args():
     parser.add_argument("subtask", choices=[0], type=int, help="choose subtask")
     parser.add_argument("-d", default="data", type=str, help="specify data directory")
     parser.add_argument("-m", default="model", type=str, help="specify model name")
-    parser.add_argument("-s", default="summary", type=str, help="specify summary name")
+    # parser.add_argument("-s", default="summary", type=str, help="specify summary name") TODO
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--train", action="store_true", help="train model only")
+    group.add_argument("--test", action="store_true", help="test model only")
 
     return parser.parse_args()
 

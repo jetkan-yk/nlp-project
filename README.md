@@ -7,12 +7,12 @@
 The [SemEval-2021 Shared Task NLP CONTRIBUTION GRAPH](https://competitions.codalab.org/competitions/25680) (a.k.a. ‘the NCG task’) tasks participants to develop
 automated systems that structure contributions from NLP scholarly articles in English.
 
-#### Subtask 1
+### Subtask 1
 
 **Input:** a research article in plaintext format \
 **Output:** a set of contributing sentences
 
-#### Subtask 2
+### Subtask 2
 
 **Input:** a contributing sentence \
 **Output:** a set of scientific knowledge terms and predicate phrases
@@ -41,7 +41,9 @@ These flags can be combined into one single command line:
 
 - Use `-d [data_dir/]` to specify which dataset folder to use
 - Use `-m [model_name]` to specify the model filename to generate
-- Use `-s [summary_name]` to specify the summary filename to write
+- _(WIP)_ Use `-s [summary_name]` to specify the summary filename to write
+- Use `--train` to train model only
+- Use `--test` to test model only
 
 #### Example
 
@@ -83,6 +85,13 @@ The data folders is organized as follows:
         │   │   └── ...                                # there are 12 information units in all and each article may be annotated by 3 or 6
         │   └── ...                                    # there are K articles annotated for each task, so this repeats for the remaining K-1 annotated articles
         └── ...                                        # if there are N task folders overall, then this repeats N-1 more times
+
+## Development
+
+### Branches
+
+- `main` - root branch
+- `demo-a2` - a demo mode that emulates assignment 2's dataset & model
 
 ## Resources
 
