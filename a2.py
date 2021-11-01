@@ -1,3 +1,7 @@
+"""
+My assignment 2 file for demo mode reference
+"""
+
 import argparse
 import datetime
 import string
