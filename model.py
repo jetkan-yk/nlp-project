@@ -82,7 +82,7 @@ class NcgModel:
                 running_loss += loss.item()
 
                 # print loss value every 100 steps and reset the running loss
-                if step % 100 == 0:
+                if step % 100 == 99:
                     print(
                         "[%d, %5d] loss: %.3f"
                         % (epoch + 1, step + 1, running_loss / 100)
