@@ -1,5 +1,6 @@
 """
-Usage: python3 main.py [subtask] [-d data_dir] [-m model_name] [-s summary_name]
+main file only for demo purpose
+Usage: python3 main.py 0 [-d data_dir] [-m model_name] [-s summary_name]
 """
 
 import argparse
@@ -7,18 +8,20 @@ import argparse
 import torch
 from torch.utils.data.dataset import random_split
 
-from data import NcgDataset
-from model import NcgModel
+from data import NcgDatasetDemo
+from model import NcgModelDemo
 
 TRAIN_RATIO = 0.8
 
 
 def main(args):
-    dataset = NcgDataset(args.subtask, args.d)
+    print("Running demo...")
+
+    dataset = NcgDatasetDemo(args.subtask, args.d)
     train_data, test_data = train_test_split(dataset)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = NcgModel(args.subtask, device)
+    model = NcgModelDemo(args.subtask, device)
     model.train(train_data, args.m)
     model.test(test_data, args.s)
 
@@ -39,7 +42,7 @@ def parse_args():
     """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("subtask", choices=[1, 2], type=int, help="choose subtask")
+    parser.add_argument("subtask", choices=[0], type=int, help="choose subtask")
     parser.add_argument("-d", default="data", type=str, help="specify data directory")
     parser.add_argument("-m", default="model", type=str, help="specify model name")
     parser.add_argument("-s", default="summary", type=str, help="specify summary name")
