@@ -28,7 +28,7 @@ automated systems that structure contributions from NLP scholarly articles in En
 
 1. Make sure you have installed all the dependencies mentioned above
 2. Clone or download this repository, then open a terminal and navigate to this folder
-3. Train, test & evaluate the model by running `python3 main.py [1 | 2]` which performs these actions on `subtask 1 or 2`:
+3. Train, test & evaluate the model by running `python3 main.py {1 | 2}` which performs these actions on `subtask 1 or 2`:
    1. Load all data from the `data/` folder
    2. Randomly split the dataset into training & testing set
    3. Train the model using the training set and store the model in the `model` file
