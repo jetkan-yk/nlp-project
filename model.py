@@ -143,14 +143,10 @@ def evaluate(preds, labels):
     """
     tp = fp = fn = 0
 
-    tp_data = [i for i in preds if i in labels]
-    tp = tp + len(tp_data)
-
-    fp_data = [i for i in preds if i not in labels]
-    fp = fp + len(fp_data)
-
-    fn_data = [i for i in labels if i not in preds]
-    fn = fn + len(fn_data)
+    for pred, label in zip(preds, labels):
+        tp += pred == label
+        fp += pred != label
+        fn += label != pred
 
     return fscore(tp, fp, fn)
 
