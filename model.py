@@ -99,7 +99,7 @@ class NcgModel:
         data_loader = DataLoader(
             test_data, NcgModel.BATCH_SIZE, collate_fn=self.collator
         )
-        verdicts = []
+        score = 0.0
 
         self.model.eval()
         with torch.no_grad():
@@ -108,11 +108,9 @@ class NcgModel:
                 labels = data[1].to(self.device)
 
                 preds = self.model(features)
+                score += self.evaluator(preds, labels)
 
-                evaluation = self.evaluator(preds, labels)
-                verdicts.append(evaluation)
-
-        print(verdicts)
+        print(f"Accuracy: {score / len(data_loader):.{3}}")
 
 
 def save_model(subtask, model: nn.Module, model_name):
@@ -124,10 +122,3 @@ def save_model(subtask, model: nn.Module, model_name):
 
     torch.save(checkpoint, model_path)
     print(f"Model saved in {model_path}")
-
-
-def summarize(subtask, verdicts, summary_name):
-    """
-    Writes the summary file as `summary_name` in the subtask folder.
-    """
-    raise NotImplementedError
