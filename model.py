@@ -12,19 +12,17 @@ from torch.utils.data import DataLoader
 from subtask1.model1 import Model1, collator1, evaluator1
 from subtask2.model2 import Model2, collator2, evaluator2
 
-# Hyperparameters
-BATCH_SIZE = 20
-LEARNING_RATE = 0.3
-MOMENTUM = 0.8
-EPOCHS = 10
-
-# TODO: do proof of concept using a2 dataset and model
-
 
 class NcgModel:
     """
     A model class that is powered by a `PyTorch nn.Module` subclass.
     """
+
+    # Hyperparameters
+    BATCH_SIZE = 20
+    LEARNING_RATE = 0.3
+    MOMENTUM = 0.8
+    EPOCHS = 10
 
     def __init__(self, subtask, device):
         self.subtask = subtask
@@ -47,15 +45,17 @@ class NcgModel:
         """
         data_loader = DataLoader(
             train_data,
-            BATCH_SIZE,
+            NcgModel.BATCH_SIZE,
             shuffle=True,
             collate_fn=self.collator,
         )
         criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(self.model.parameters(), LEARNING_RATE, MOMENTUM)
+        optimizer = optim.SGD(
+            self.model.parameters(), NcgModel.LEARNING_RATE, NcgModel.MOMENTUM
+        )
 
         start = datetime.now()
-        for epoch in range(EPOCHS):
+        for epoch in range(NcgModel.EPOCHS):
             self.model.train()
             running_loss = 0.0
 
@@ -97,7 +97,9 @@ class NcgModel:
         """
         Tests the model using `test_data` and writes a summary file `summary_name`
         """
-        data_loader = DataLoader(test_data, BATCH_SIZE, collate_fn=self.collator)
+        data_loader = DataLoader(
+            test_data, NcgModel.BATCH_SIZE, collate_fn=self.collator
+        )
         verdicts = []
 
         self.model.eval()
@@ -131,7 +133,7 @@ def summarize(subtask, verdicts, summary_name):
     """
     summary_path = os.path.join(f"subtask{subtask}", summary_name)
 
-    print(f"Summary generated in {summary_path}")
+    with open(summary_path, "w") as f:
+        f.write(verdicts)
 
-    # TODO: Implement summarizer
-    raise NotImplementedError
+    print(f"Summary generated in {summary_path}")
