@@ -1,5 +1,5 @@
 """
-Usage: python3 main.py {1 | 2} [--train | --test] [-d data_dir] [-m model_name] [-s summary_name]
+Usage: python3 main.py {1 | 2} [--train | --test] [-d data_dir] [-m model_name]
 """
 
 import argparse
@@ -23,7 +23,6 @@ def main(args):
     if args.train or args.train == args.test:
         model.train(train_data, args.m)
     if args.test or args.train == args.test:
-        # model.test(test_data, args.s) TODO
         model.test(test_data)
 
 
@@ -46,7 +45,6 @@ def parse_args():
     parser.add_argument("subtask", choices=[1, 2], type=int, help="choose subtask")
     parser.add_argument("-d", default="data", type=str, help="specify data directory")
     parser.add_argument("-m", default="model", type=str, help="specify model name")
-    # parser.add_argument("-s", default="summary", type=str, help="specify summary name") TODO
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--train", action="store_true", help="train model only")
