@@ -16,7 +16,7 @@ from subtask2.model2 import Model2, collator2, evaluator2
 BATCH_SIZE = 20
 LEARNING_RATE = 0.3
 MOMENTUM = 0.8
-EPOCHS = 30
+EPOCHS = 10
 
 # TODO: do proof of concept using a2 dataset and model
 
