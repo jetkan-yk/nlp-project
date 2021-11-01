@@ -1,5 +1,5 @@
 """
-Implements the NcgModel class
+Implements the NcgModelDemo class
 """
 
 import os
@@ -18,10 +18,8 @@ LEARNING_RATE = 0.3
 MOMENTUM = 0.8
 EPOCHS = 30
 
-# TODO: do proof of concept using a2 dataset and model
 
-
-class NcgModel:
+class NcgModelDemo:
     """
     A model class that is powered by a `PyTorch nn.Module` subclass.
     """
