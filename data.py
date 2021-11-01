@@ -7,6 +7,20 @@ import string
 import torch
 from torch.utils.data import Dataset
 
+SYMBOLS = [c for c in string.ascii_lowercase] + [
+    "_",  # space
+    "*",  # digits
+    "?",  # other characters
+]
+# every combinations of (symbol1, symbol2)
+BIGRAMS = ((s1, s2) for s1 in SYMBOLS for s2 in SYMBOLS)
+# maps a tuple of symbols to their bigram_id
+VOCAB = {bigram: idx for idx, bigram in enumerate(BIGRAMS, start=1)}
+
+LANGUAGES = ["eng", "deu", "fra", "ita", "spa"]
+# maps a language name to their lang_id
+LANG = {language: idx for idx, language in enumerate(LANGUAGES)}
+
 
 def load_texts(data_dir):
     """
@@ -23,7 +37,7 @@ def load_texts(data_dir):
         sentence = row.strip().lower()
         for i in range(len(sentence) - 1):
             s1, s2 = parse_char(sentence[i]), parse_char(sentence[i + 1])
-            bigrams.append(NcgDatasetDemo.VOCAB[s1, s2])
+            bigrams.append(VOCAB[s1, s2])
         texts.append(torch.tensor(bigrams))
     return texts
 
@@ -54,7 +68,7 @@ def load_labels(data_dir):
     labels = []
     for row in data:
         label = row.strip()
-        labels.append(NcgDatasetDemo.LANG[label])
+        labels.append(LANG[label])
     return labels
 
 
@@ -62,20 +76,6 @@ class NcgDatasetDemo(Dataset):
     """
     Dataset class only for demo purpose.
     """
-
-    SYMBOLS = [c for c in string.ascii_lowercase] + [
-        "_",  # space
-        "*",  # digits
-        "?",  # other characters
-    ]
-    # every combinations of (symbol1, symbol2)
-    BIGRAMS = ((s1, s2) for s1 in SYMBOLS for s2 in SYMBOLS)
-    # maps a tuple of symbols to their bigram_id
-    VOCAB = {bigram: idx for idx, bigram in enumerate(BIGRAMS, start=1)}
-
-    LANGUAGES = ["eng", "deu", "fra", "ita", "spa"]
-    # maps a language name to their lang_id
-    LANG = {language: idx for idx, language in enumerate(LANGUAGES)}
 
     def __init__(self, subtask, data_dir):
         self.subtask = subtask
@@ -109,7 +109,7 @@ class NcgDatasetDemo(Dataset):
             num_vocab: size of the vocabulary
             num_class: number of class labels
         """
-        num_vocab = len(NcgDatasetDemo.VOCAB)
-        num_class = len(NcgDatasetDemo.LANG)
+        num_vocab = len(VOCAB)
+        num_class = len(LANG)
 
         return num_vocab, num_class
