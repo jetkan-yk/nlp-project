@@ -92,10 +92,12 @@ class NcgModel:
 
         save_model(self.subtask, self.model, model_name)
 
-    def test(self, test_data):
+    def test(self, test_data, model_name):
         """
         Tests the model using `test_data`
         """
+        self.model = load_model(self.subtask, self.model, model_name)
+
         data_loader = DataLoader(
             test_data, NcgModel.BATCH_SIZE, collate_fn=self.collator
         )
@@ -122,3 +124,14 @@ def save_model(subtask, model: nn.Module, model_name):
 
     torch.save(checkpoint, model_path)
     print(f"Model saved in {model_path}")
+
+
+def load_model(subtask, model: nn.Module, model_name):
+    """
+    Loads the model state from `model_name`in the subtask folder.
+    """
+    model_path = os.path.join(f"subtask{subtask}", model_name)
+
+    model.load_state_dict(torch.load(model_path))
+
+    return model
