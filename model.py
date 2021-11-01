@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 from subtask0.model0 import Model0, collator0, evaluator0
 
 
-class NcgModel:
+class NcgModelDemo:
     """
     A model class that is powered by a `PyTorch nn.Module` subclass.
     """
@@ -40,17 +40,17 @@ class NcgModel:
         """
         data_loader = DataLoader(
             train_data,
-            NcgModel.BATCH_SIZE,
+            NcgModelDemo.BATCH_SIZE,
             shuffle=True,
             collate_fn=self.collator,
         )
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(
-            self.model.parameters(), NcgModel.LEARNING_RATE, NcgModel.MOMENTUM
+            self.model.parameters(), NcgModelDemo.LEARNING_RATE, NcgModelDemo.MOMENTUM
         )
 
         start = datetime.now()
-        for epoch in range(NcgModel.EPOCHS):
+        for epoch in range(NcgModelDemo.EPOCHS):
             self.model.train()
             running_loss = 0.0
 
@@ -93,7 +93,7 @@ class NcgModel:
         Tests the model using `test_data` and writes a summary file `summary_name`
         """
         data_loader = DataLoader(
-            test_data, NcgModel.BATCH_SIZE, collate_fn=self.collator
+            test_data, NcgModelDemo.BATCH_SIZE, collate_fn=self.collator
         )
         verdicts = []
 
@@ -128,7 +128,7 @@ def summarize(subtask, verdicts, summary_name):
     """
     summary_path = os.path.join(f"subtask{subtask}", summary_name)
 
-    with open(summary_path, "w") as f:
-        f.write(verdicts)
+    # with open(summary_path, "w") as f:
+    #     f.write("\n".join(verdicts))
 
-    print(f"Summary generated in {summary_path}")
+    # print(f"Summary generated in {summary_path}")
