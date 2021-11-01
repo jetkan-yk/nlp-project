@@ -29,7 +29,8 @@ def collator2(batch):
 
 def evaluator2(preds, labels):
     """
-    Evaluates the predicted results against the expected labels
+    Evaluates the predicted results against the expected labels and
+    returns a score for the result batch
     """
     # TODO: Implement evaluator here
     raise NotImplementedError
