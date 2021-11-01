@@ -1,5 +1,5 @@
 """
-Usage: python3 main.py [subtask] [-d data_dir] [-m model_name] [-s summary_name]
+Usage: python3 main.py [subtask] [-d data_dir] [-m model_name] [-s summary_name] [--train | --test]
 """
 
 import argparse
