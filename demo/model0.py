@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch import nn
 
 
-class ModelDemo(nn.Module):
+class Model0(nn.Module):
     """
     A `PyTorch nn.Module` subclass for demo.
     """
@@ -37,7 +37,7 @@ class ModelDemo(nn.Module):
         return output
 
 
-def collatorDemo(batch):
+def collator0(batch):
     """
     Collate function for DataLoader
     """
@@ -49,7 +49,7 @@ def collatorDemo(batch):
     return texts, labels
 
 
-def evaluatorDemo(preds, labels):
+def evaluator0(preds, labels):
     """
     Evaluates the predicted results against the expected labels
     """
