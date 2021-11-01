@@ -1,6 +1,7 @@
 """
 Dataset class only for demo purpose.
 """
+import os
 import string
 
 import torch
@@ -21,10 +22,12 @@ LANGUAGES = ["eng", "deu", "fra", "ita", "spa"]
 LANG = {language: idx for idx, language in enumerate(LANGUAGES)}
 
 
-def load_texts(text_path):
+def load_texts(data_dir):
     """
-    Read the content from text_path and parse each sentence into bigram_id
+    Read the x.txt content from data_dir and parse each sentence into bigram_id
     """
+    text_path = os.path.join(data_dir, "x.txt")
+
     with open(text_path, "r", encoding="utf8") as f:
         data = f.readlines()
 
@@ -53,10 +56,12 @@ def parse_char(c: str):
         return "?"
 
 
-def load_labels(label_path):
+def load_labels(data_dir):
     """
-    Read the content from label_path and parse each label into lang_id
+    Read the y.txt content from data_dir and parse each label into lang_id
     """
+    label_path = os.path.join(data_dir, "y.txt")
+
     with open(label_path, "r") as f:
         data = f.readlines()
 
@@ -72,17 +77,20 @@ class NcgDatasetDemo(Dataset):
     Dataset class only for demo purpose.
     """
 
-    def __init__(self, text_path, label_path=None):
-        self.texts = self.load_texts(text_path)
-        self.labels = (
-            self.load_labels(label_path) if label_path else [-1] * len(self.texts)
-        )
+    def __init__(self, subtask, data_dir):
+        self.subtask = subtask
+
+        if self.subtask == 0:
+            self.x = load_texts(data_dir)
+            self.y = load_labels(data_dir)
+        else:
+            raise KeyError
 
     def __len__(self):
         """
         Return the number of instances in the data
         """
-        return len(self.texts)
+        return len(self.x)
 
     def __getitem__(self, i):
         """
@@ -93,10 +101,7 @@ class NcgDatasetDemo(Dataset):
 
         DO NOT pad the tensor here, do it at the collator function.
         """
-        text = self.texts[i]
-        label = self.labels[i]
-
-        return text, label
+        return self.x[i], self.y[i]
 
     def vocab_size(self):
         """
