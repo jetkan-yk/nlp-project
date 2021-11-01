@@ -103,7 +103,7 @@ class NcgDatasetDemo(Dataset):
         """
         return self.x[i], self.y[i]
 
-    def vocab_size(self):
+    def vocab_size():
         """
         A function to inform the vocab size. The function returns two numbers:
             num_vocab: size of the vocabulary

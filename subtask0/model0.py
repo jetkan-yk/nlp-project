@@ -6,16 +6,20 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
+from data import NcgDatasetDemo
+
 
 class Model0(nn.Module):
     """
     A `PyTorch nn.Module` subclass for demo.
     """
 
-    def __init__(self, num_vocab, num_class):
+    def __init__(self):
         super().__init__()
         embedding_dim = 256
         hidden_dim = 128
+        num_vocab, num_class = NcgDatasetDemo.vocab_size()
+
         self.embedding = nn.Embedding(num_vocab + 1, embedding_dim, padding_idx=0)
         self.hidden = nn.Linear(embedding_dim, hidden_dim)
         self.dropout = nn.Dropout(0.5)
