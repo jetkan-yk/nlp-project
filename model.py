@@ -92,9 +92,9 @@ class NcgModel:
 
         save_model(self.subtask, self.model, model_name)
 
-    def test(self, test_data, summary_name):
+    def test(self, test_data):
         """
-        Tests the model using `test_data` and writes a summary file `summary_name`
+        Tests the model using `test_data`
         """
         data_loader = DataLoader(
             test_data, NcgModel.BATCH_SIZE, collate_fn=self.collator
@@ -112,7 +112,7 @@ class NcgModel:
                 evaluation = self.evaluator(preds, labels)
                 verdicts.append(evaluation)
 
-        summarize(self.subtask, verdicts, summary_name)
+        print(verdicts)
 
 
 def save_model(subtask, model: nn.Module, model_name):
@@ -130,9 +130,4 @@ def summarize(subtask, verdicts, summary_name):
     """
     Writes the summary file as `summary_name` in the subtask folder.
     """
-    summary_path = os.path.join(f"subtask{subtask}", summary_name)
-
-    with open(summary_path, "w") as f:
-        f.write(verdicts)
-
-    print(f"Summary generated in {summary_path}")
+    raise NotImplementedError
