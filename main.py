@@ -25,7 +25,8 @@ def main(args):
     if args.train or args.train == args.test:
         model.train(train_data, args.m)
     if args.test or args.train == args.test:
-        model.test(test_data, args.s)
+        # model.test(test_data, args.s) TODO
+        model.test(test_data)
 
 
 def train_test_split(dataset):
