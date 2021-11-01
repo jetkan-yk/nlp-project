@@ -14,8 +14,6 @@ TRAIN_RATIO = 0.8
 
 
 def main(args):
-    print("Running demo-a2 ...")
-
     dataset = NcgDatasetDemo(args.subtask, args.d)
     train_data, test_data = train_test_split(dataset)
 
