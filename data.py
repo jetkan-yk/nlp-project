@@ -109,7 +109,7 @@ class NcgDatasetDemo(Dataset):
             num_vocab: size of the vocabulary
             num_class: number of class labels
         """
-        num_vocab = len(VOCAB)
-        num_class = len(LANG)
+        num_vocab = len(NcgDatasetDemo.VOCAB)
+        num_class = len(NcgDatasetDemo.LANG)
 
         return num_vocab, num_class
