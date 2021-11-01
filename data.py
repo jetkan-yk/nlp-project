@@ -1,149 +1,110 @@
 """
-Loads dataset, pre-processes data and implements the NcgDataset class
+Dataset class only for demo purpose.
 """
+import string
 
-import os
-from collections import defaultdict
-
+import torch
 from torch.utils.data import Dataset
 
+SYMBOLS = [c for c in string.ascii_lowercase] + [
+    "_",  # space
+    "*",  # digits
+    "?",  # other characters
+]
+# every combinations of (symbol1, symbol2)
+BIGRAMS = ((s1, s2) for s1 in SYMBOLS for s2 in SYMBOLS)
+# maps a tuple of symbols to their bigram_id
+VOCAB = {bigram: idx for idx, bigram in enumerate(BIGRAMS, start=1)}
 
-def load_data(data_dir):
+LANGUAGES = ["eng", "deu", "fra", "ita", "spa"]
+# maps a language name to their lang_id
+LANG = {language: idx for idx, language in enumerate(LANGUAGES)}
+
+
+def load_texts(text_path):
     """
-    Loads data from directory `data_dir` and returns a tuple of `(names, articles, sents, phrases)`.
-
-    - `names` the sample's folder name, e.g. `data/constituency_parsing/0`
-    - `articles` the NLP scholarly article plaintext, each article is a list of `string`
-    - `sents` a list of contributing sentence ids (0-indexed)
-    - `phrases` the scientific terms and relational cue phrases extracted from the contributing
-    sentences, each entry is a `dict` of `{sents: phrases}` (each phrase is a list of `string`),
+    Read the content from text_path and parse each sentence into bigram_id
     """
-    names = []
-    articles = []
-    sents = []
-    phrases = []
+    with open(text_path, "r", encoding="utf8") as f:
+        data = f.readlines()
 
-    for dirpath, dirnames, filenames in os.walk(data_dir):
-        if dirnames != ["info-units", "triples"]:
-            continue
-
-        # Currently located in task folder
-        names.append(dirpath)
-
-        for filename in filenames:
-            # Load article
-            if filename.endswith("-Stanza-out.txt"):
-                with open(os.path.join(dirpath, filename)) as f:
-                    article = f.read().splitlines()
-                    articles.append(article)
-
-            # Load contributing sentence id
-            if filename == "sentences.txt":
-                with open(os.path.join(dirpath, filename)) as f:
-                    sent_str_list = f.read().splitlines()
-                    sent = parse_sent(sent_str_list)
-                    sents.append(sent)
-
-            # Load phrase
-            if filename == "entities.txt":
-                with open(os.path.join(dirpath, filename)) as f:
-                    phrase_str_list = f.read().splitlines()
-                    phrase = parse_phrase(phrase_str_list)
-                    phrases.append(phrase)
-
-    return names, articles, sents, phrases
+    texts = []
+    for row in data:
+        bigrams = []
+        sentence = row.strip().lower()
+        for i in range(len(sentence) - 1):
+            s1, s2 = parse_char(sentence[i]), parse_char(sentence[i + 1])
+            bigrams.append(VOCAB[s1, s2])
+        texts.append(torch.tensor(bigrams))
+    return texts
 
 
-def parse_sent(sent_str_list: list[str]):
+def parse_char(c: str):
     """
-    Parses a list of `string` contributing sentence ids to a list of `int`, 0-indexed.
+    Parse character c into their correct symbol type
     """
-    return sorted(map(lambda sent_str: int(sent_str) - 1, sent_str_list))
+    if c in string.ascii_lowercase:
+        return c
+    elif c.isdigit():
+        return "*"
+    elif c.isspace():
+        return "_"
+    else:
+        return "?"
 
 
-def parse_phrase(phrase_str_list: list[str]):
+def load_labels(label_path):
     """
-    Parses a list of `string` phrase list into a `dict` that maps the contributing sentence id
-    to a list of `string` phrase.
+    Read the content from label_path and parse each label into lang_id
     """
-    phrase_list = map(lambda phrase_str: phrase_str.split("\t", 4), phrase_str_list)
+    with open(label_path, "r") as f:
+        data = f.readlines()
 
-    phrase_dict = defaultdict(list)
-    for row in phrase_list:
-        sent = int(row[0]) - 1
-        phrase = row[-1]
-        phrase_dict[sent].append(phrase)
-    return phrase_dict
+    labels = []
+    for row in data:
+        label = row.strip()
+        labels.append(LANG[label])
+    return labels
 
 
-class NcgDataset(Dataset):
+class NcgDatasetDemo(Dataset):
     """
-    A `PyTorch Dataset` class that accepts a subtask number and a data directory.
-
-    For subtask 1:
-        x = a full article plaintext (a list of strings) \\
-        y = a contributing sentence (a string)
-
-    For subtask 2:
-        x = a contributing sentence (a string) \\
-        y = a list of phrases (a list of strings)
+    Dataset class only for demo purpose.
     """
 
-    def __init__(self, subtask, data_dir):
-        self.subtask = subtask
-        self.names, self.articles, self.sents, self.phrases = load_data(data_dir)
-
-        if self.subtask == 1:
-            self._init_subtask1()
-        elif self.subtask == 2:
-            self._init_subtask2()
-        else:
-            raise KeyError
-
-    def _init_subtask1(self):
-        """
-        Initializes the dataset for subtask 1
-        """
-        self.x = []
-        self.y = []
-        for idx, sent_list in enumerate(self.sents):
-            for sent in sent_list:
-                self.x.append(idx)
-                self.y.append((idx, sent))
-
-    def _init_subtask2(self):
-        """
-        Initializes the dataset for subtask 2
-        """
-        self.x = []
-        self.y = []
-        for idx, phrase_dict in enumerate(self.phrases):
-            for sent, phrase in phrase_dict.items():
-                self.x.append((idx, sent))
-                self.y.append(phrase)
+    def __init__(self, text_path, label_path=None):
+        self.texts = self.load_texts(text_path)
+        self.labels = (
+            self.load_labels(label_path) if label_path else [-1] * len(self.texts)
+        )
 
     def __len__(self):
         """
-        Returns the number of samples in the dataset.
+        Return the number of instances in the data
         """
-        return len(self.x)
+        return len(self.texts)
 
     def __getitem__(self, i):
         """
-        Returns the i-th sample's `(x, y)` tuple.
-        """
-        return self._stringify(self.x[i]), self._stringify(self.y[i])
+        Return the i-th instance in the format of:
+            (text, label)
+        Text and label should be encoded according to the vocab (word_id).
+        both text and label are recommended to be in pytorch tensor type.
 
-    def _stringify(self, data):
+        DO NOT pad the tensor here, do it at the collator function.
         """
-        Converts the article or sentence index into `string`
+        text = self.texts[i]
+        label = self.labels[i]
+
+        return text, label
+
+    def vocab_size(self):
         """
-        if isinstance(data, list):
-            return data
-        elif isinstance(data, tuple):
-            idx, sent = data
-            return self.articles[idx][sent]
-        elif isinstance(data, int):
-            return self.articles[data]
-        else:
-            raise KeyError
+        A function to inform the vocab size. The function returns two numbers:
+            num_vocab: size of the vocabulary
+            num_class: number of class labels
+        """
+        num_vocab = len(VOCAB)
+        num_class = len(LANG)
+
+        return num_vocab, num_class
