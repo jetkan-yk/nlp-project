@@ -57,7 +57,6 @@ def evaluator0(preds, labels):
     """
     Evaluates the predicted results against the expected labels
     """
-    y_pred = torch.argmax(preds)
-    y_true = torch.argmax(labels)
+    y_preds = torch.argmax(preds, dim=1)
 
-    return y_pred == y_true
+    return sum(labels == y_preds) / len(labels)
