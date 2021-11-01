@@ -33,7 +33,6 @@ automated systems that structure contributions from NLP scholarly articles in En
    2. Randomly split the dataset into training & testing set
    3. Train the model using the training set and store the model in the `model` file
    4. Test the model against the testing set
-   5. Evaluate the test output and generate a `summary` file
 
 ### Useful flags
 
@@ -47,24 +46,26 @@ These flags can be combined into one single command line:
 
 #### Example
 
-`python3 main.py 1 -d data-small/ -m sci-bert -s test1`
+`python3 main.py 1 -d data-small/ -m sci-bert`
 
 ## Project Structure
 
 ### General
 
+![architecture](documentation/architecture.png)
+
 - `main.py` - main runner file of the project
 - `data.py` - loads, pre-processes data and implements the `NcgDataset` class
-- `model.py` - implements the `NcgModel` class
-- `subtask1/` - subtask 1 implementations
-- `subtask2/` - subtask 2 implementations
+- `model.py` - loads, saves model and implements the `NcgModel` class
+- `subtask1/` - implements the `Model1` class and other subtask 1 helper functions
+- `subtask2/` - implements the `Model2` class and other subtask 2 helper functions
 - `documentation/` - written reports
 
 ### Data
 
 - `data/` - contains 38 task folders
 - `data-small/` - a subset of `data/`, contains 5 task folders
-- `data-mini/` - a subset of `data/`, contains 1 task folder
+- `data-one/` - a subset of `data/`, contains 1 task folder
 
 The data folders is organized as follows:
 
@@ -85,8 +86,6 @@ The data folders is organized as follows:
         │   │   └── ...                                # there are 12 information units in all and each article may be annotated by 3 or 6
         │   └── ...                                    # there are K articles annotated for each task, so this repeats for the remaining K-1 annotated articles
         └── ...                                        # if there are N task folders overall, then this repeats N-1 more times
-
-## Development
 
 ### Branches
 
