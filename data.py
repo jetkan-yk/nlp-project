@@ -100,6 +100,8 @@ class NcgDataset(Dataset):
         else:
             raise KeyError
 
+        print(f"Loaded data from {data_dir}\n")
+
     def _init_subtask1(self):
         """
         Initializes the dataset for subtask 1
