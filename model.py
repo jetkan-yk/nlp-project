@@ -34,6 +34,8 @@ class NcgModelDemo:
         else:
             raise KeyError
 
+        print(f"Initialized model {self.model}")
+
     def train(self, train_data, model_name):
         """
         Trains the model using `train_data` and saves the model in `model_name`
@@ -128,5 +130,6 @@ def load_model(subtask, model: nn.Module, model_name):
     model_path = os.path.join(f"subtask{subtask}", model_name)
 
     model.load_state_dict(torch.load(model_path))
+    print(f"Loaded model {model_path}")
 
     return model
