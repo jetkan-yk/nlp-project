@@ -9,8 +9,7 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from subtask1.model1 import Model1, collator1, evaluator1
-from subtask2.model2 import Model2, collator2, evaluator2
+from demo.model0 import Model0, collator0, evaluator0
 
 # Hyperparameters
 BATCH_SIZE = 20
@@ -28,14 +27,10 @@ class NcgModelDemo:
         self.subtask = subtask
         self.device = device
 
-        if self.subtask == 1:
-            self.model = Model1().to(self.device)
-            self.collator = collator1
-            self.evaluator = evaluator1
-        elif self.subtask == 2:
-            self.model = Model2().to(self.device)
-            self.collator = collator2
-            self.evaluator = evaluator2
+        if self.subtask == 0:
+            self.model = Model0().to(self.device)
+            self.collator = collator0
+            self.evaluator = evaluator0
         else:
             raise KeyError
 
