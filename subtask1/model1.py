@@ -1,5 +1,5 @@
 """
-Implements the Model class for subtask 1
+Implements the `Model1` class and other subtask 1 helper functions
 """
 
 from torch import nn

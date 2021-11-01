@@ -1,5 +1,5 @@
 """
-Loads dataset, pre-processes data and implements the NcgDataset class
+Loads, pre-processes data and implements the `NcgDataset` class
 """
 
 import os
@@ -16,7 +16,7 @@ def load_data(data_dir):
     - `articles` the NLP scholarly article plaintext, each article is a list of `string`
     - `sents` a list of contributing sentence ids (0-indexed)
     - `phrases` the scientific terms and relational cue phrases extracted from the contributing
-    sentences, each entry is a `dict` of `{sents: phrases}` (each phrase is a list of `string`),
+    sentences, each entry is a `dict` of `{sents: phrases}` (each phrase is a list of `string`)
     """
     names = []
     articles = []
@@ -56,7 +56,7 @@ def load_data(data_dir):
 
 def parse_sent(sent_str_list: list[str]):
     """
-    Parses a list of `string` contributing sentence ids to a list of `int`, 0-indexed.
+    Parses a list of `string` contributing sentence ids to a list of `int`, 0-indexed
     """
     return sorted(map(lambda sent_str: int(sent_str) - 1, sent_str_list))
 
@@ -64,7 +64,7 @@ def parse_sent(sent_str_list: list[str]):
 def parse_phrase(phrase_str_list: list[str]):
     """
     Parses a list of `string` phrase list into a `dict` that maps the contributing sentence id
-    to a list of `string` phrase.
+    to a list of `string` phrase
     """
     phrase_list = map(lambda phrase_str: phrase_str.split("\t", 4), phrase_str_list)
 
@@ -81,12 +81,12 @@ class NcgDataset(Dataset):
     A `PyTorch Dataset` class that accepts a subtask number and a data directory.
 
     For subtask 1:
-        x = a full article plaintext (a list of strings) \\
-        y = a contributing sentence (a string)
+        x = a full article plaintext (a list of `string`) \\
+        y = a contributing sentence (a `string`)
 
     For subtask 2:
-        x = a contributing sentence (a string) \\
-        y = a list of phrases (a list of strings)
+        x = a contributing sentence (a `string`) \\
+        y = a list of phrases (a list of `string`)
     """
 
     def __init__(self, subtask, data_dir):
@@ -126,13 +126,13 @@ class NcgDataset(Dataset):
 
     def __len__(self):
         """
-        Returns the number of samples in the dataset.
+        Returns the number of samples in the dataset
         """
         return len(self.x)
 
     def __getitem__(self, i):
         """
-        Returns the i-th sample's `(x, y)` tuple.
+        Returns the i-th sample's `(x, y)` tuple
         """
         return self._stringify(self.x[i]), self._stringify(self.y[i])
 
