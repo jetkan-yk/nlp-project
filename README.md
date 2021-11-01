@@ -31,8 +31,8 @@ automated systems that structure contributions from NLP scholarly articles in En
 3. Train, test & evaluate the model by running `python3 main.py [1 | 2]` which performs these actions on `subtask 1 or 2`:
    1. Load all data from the `data/` folder
    2. Randomly split the dataset into training & testing set
-   3. Train the model and store in the `model` file
-   4. Test the model and generate an `output` file
+   3. Train the model using the training set and store the model in the `model` file
+   4. Test the model against the testing set
    5. Evaluate the test output and generate a `summary` file
 
 ### Useful flags
@@ -40,8 +40,8 @@ automated systems that structure contributions from NLP scholarly articles in En
 These flags can be combined into one single command line:
 
 - Use `-d [data_dir/]` to specify which dataset folder to use
-- Use `-m [model_name]` to specify the model filename (without file extension) to generate and use
-- Use `-s [summary_name]` to specify the summary filename (without file extension) to generate
+- Use `-m [model_name]` to specify the model filename to generate
+- Use `-s [summary_name]` to specify the summary filename to write
 
 #### Example
 
