@@ -55,7 +55,8 @@ def collator0(batch):
 
 def evaluator0(preds, labels):
     """
-    Evaluates the predicted results against the expected labels
+    Evaluates the predicted results against the expected labels and
+    returns a score for the result batch
     """
     y_preds = torch.argmax(preds, dim=1)
 
