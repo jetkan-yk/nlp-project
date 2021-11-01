@@ -25,12 +25,3 @@ def collator1(batch):
     """
     # TODO: Implement collator here
     raise NotImplementedError
-
-
-def evaluator1(preds, labels):
-    """
-    Evaluates the predicted results against the expected labels and
-    returns a score for the result batch
-    """
-    # TODO: Implement evaluator here
-    raise NotImplementedError

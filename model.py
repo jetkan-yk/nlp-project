@@ -9,8 +9,8 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from subtask1.model1 import Model1, collator1, evaluator1
-from subtask2.model2 import Model2, collator2, evaluator2
+from subtask1.model1 import Model1, collator1
+from subtask2.model2 import Model2, collator2
 
 
 class NcgModel:
@@ -31,11 +31,9 @@ class NcgModel:
         if self.subtask == 1:
             self.model = Model1().to(self.device)
             self.collator = collator1
-            self.evaluator = evaluator1
         elif self.subtask == 2:
             self.model = Model2().to(self.device)
             self.collator = collator2
-            self.evaluator = evaluator2
         else:
             raise KeyError
 
@@ -103,7 +101,7 @@ class NcgModel:
         data_loader = DataLoader(
             test_data, NcgModel.BATCH_SIZE, collate_fn=self.collator
         )
-        score = 0.0
+        batch_score = 0.0
 
         self.model.eval()
         with torch.no_grad():
@@ -112,9 +110,9 @@ class NcgModel:
                 labels = data[1].to(self.device)
 
                 preds = self.model(features)
-                score += self.evaluator(preds, labels)
+                batch_score += evaluate(preds, labels)
 
-        print(f"Accuracy: {score / len(data_loader):.{3}}\n")
+        print(f"Accuracy: {batch_score / len(data_loader):.{3}}\n")
 
 
 def save_model(subtask, model: nn.Module, model_name):
@@ -138,3 +136,30 @@ def load_model(subtask, model: nn.Module, model_name):
     print(f"Loaded model from {model_path}\n")
 
     return model
+
+
+def evaluate(preds, labels):
+    """
+    Evaluates the predicted results against the expected labels and
+    returns a fscore for the result batch
+    """
+    tp = fp = fn = 0
+
+    for pred, label in zip(preds, labels):
+        tp_data = [i for i in pred if i in label]
+        tp = tp + len(tp_data)
+
+        fp_data = [i for i in pred if i not in label]
+        fp = fp + len(fp_data)
+
+        fn_data = [i for i in label if i not in pred]
+        fn = fn + len(fn_data)
+
+    return fscore(tp, fp, fn)
+
+
+def fscore(tp, fp, fn):
+    """
+    Computes the fscore using the tp, fp, fn
+    """
+    return tp / (tp + 0.5 * (fp + fn))
