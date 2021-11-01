@@ -1,3 +1,0 @@
-(Contribution||has research problem||Hypernym Discovery)
-(Contribution||has research problem||Domain Adaptation)
-(Contribution||has research problem||taxonomy learning)

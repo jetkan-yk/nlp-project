@@ -1,3 +1,0 @@
-(Contribution||has research problem||parsing)
-(Contribution||has research problem||Natural language parsing)
-(Contribution||has research problem||transition - based parsing)

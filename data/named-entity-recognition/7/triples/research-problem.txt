@@ -1,3 +1,0 @@
-(Contribution||has research problem||Nested Mention Recognition)
-(Contribution||has research problem||model the nested structure of mentions)
-(Contribution||has research problem||nested hierarchical structure of entity mentions should betaken into account)

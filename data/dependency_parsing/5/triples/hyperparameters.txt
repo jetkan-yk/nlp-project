@@ -1,3 +1,0 @@
-(Contribution||has||Hyperparameters)
-(Hyperparameters||used||publicly available word2vec 2 tool)
-(publicly available word2vec 2 tool||to learn||CBOW embeddings)

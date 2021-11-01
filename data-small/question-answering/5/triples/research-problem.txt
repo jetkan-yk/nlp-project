@@ -1,3 +1,0 @@
-(Contribution||has research problem||Machine Reading)
-(Contribution||has research problem||machine comprehension)
-(Contribution||has research problem||answering Cloze - style queries with respect to a document)

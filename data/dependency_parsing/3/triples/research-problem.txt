@@ -1,2 +1,0 @@
-(Contribution||has research problem||POS tagging)
-(Contribution||has research problem||dependency parsing)

@@ -1,2 +1,0 @@
-(Contribution||has research problem||Text Processing)
-(Contribution||has research problem||learn contextsensitive convolutional filters for text processing)

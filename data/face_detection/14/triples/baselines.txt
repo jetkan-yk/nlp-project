@@ -1,5 +1,0 @@
-(Contribution||has||Baselines)
-(Baselines||select||VJ)
-(Baselines||select||ACF)
-(Baselines||select||DPM)
-(Baselines||select||Faceness)

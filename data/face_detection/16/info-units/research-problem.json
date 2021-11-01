@@ -1,5 +1,0 @@
-{
-  "has research problem" : [
-    ["Face Detection", "Landmark Localization", "Pose Estimation", "Gender Recognition", {"from sentence" : "HyperFace : A Deep Multi-task Learning Framework for Face Detection , Landmark Localization , Pose Estimation , and Gender Recognition"}]
-  ]
-}

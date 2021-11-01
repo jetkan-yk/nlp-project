@@ -1,3 +1,0 @@
-(Contribution||has research problem||Relation Extraction)
-(Contribution||has research problem||capture long - range relations between words)
-(Contribution||has research problem||capture long - range syntactic relations)

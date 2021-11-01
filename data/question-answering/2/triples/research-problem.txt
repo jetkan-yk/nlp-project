@@ -1,3 +1,0 @@
-(Contribution||has research problem||Large - scale Simple Question Answering)
-(Contribution||has research problem||Training large - scale question answering systems)
-(Contribution||has research problem||simple question answering)

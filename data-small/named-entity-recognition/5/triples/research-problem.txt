@@ -1,3 +1,0 @@
-(Contribution||has research problem||Sentence - State LSTM for Text Representation)
-(Contribution||has research problem||alternative LSTM structure for encoding text)
-(Contribution||has research problem||alternative recurrent neural network structure)
