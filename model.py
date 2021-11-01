@@ -127,4 +127,3 @@ def summarize(subtask, verdicts, summary_name):
     print(f"Summary generated in {summary_path}")
 
     # TODO: Implement summarizer
-    raise NotImplementedError
