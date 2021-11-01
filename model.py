@@ -34,7 +34,7 @@ class NcgModelDemo:
         else:
             raise KeyError
 
-        print(f"Initialized model {self.model}")
+        print(f"Initialized model\n{self.model}\n")
 
     def train(self, train_data, model_name):
         """
@@ -85,7 +85,7 @@ class NcgModelDemo:
                     )
                     running_loss = 0.0
         end = datetime.now()
-        print(f"Training finished in {(end - start).seconds / 60.0} minutes.")
+        print(f"Training finished in {(end - start).seconds / 60.0} minutes.\n")
 
         save_model(self.subtask, self.model, model_name)
 
@@ -109,7 +109,7 @@ class NcgModelDemo:
                 preds = self.model(features)
                 score += self.evaluator(preds, labels)
 
-        print(f"Accuracy: {score / len(data_loader):.{3}}")
+        print(f"Accuracy: {score / len(data_loader):.{3}}\n")
 
 
 def save_model(subtask, model: nn.Module, model_name):
@@ -120,7 +120,7 @@ def save_model(subtask, model: nn.Module, model_name):
     model_path = os.path.join(f"subtask{subtask}", model_name)
 
     torch.save(checkpoint, model_path)
-    print(f"Model saved in {model_path}")
+    print(f"Model saved in {model_path}\n")
 
 
 def load_model(subtask, model: nn.Module, model_name):
@@ -130,6 +130,6 @@ def load_model(subtask, model: nn.Module, model_name):
     model_path = os.path.join(f"subtask{subtask}", model_name)
 
     model.load_state_dict(torch.load(model_path))
-    print(f"Loaded model {model_path}")
+    print(f"Loaded model from {model_path}\n")
 
     return model

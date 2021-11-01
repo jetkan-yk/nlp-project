@@ -86,6 +86,8 @@ class NcgDatasetDemo(Dataset):
         else:
             raise KeyError
 
+        print(f"Loaded data from {data_dir}\n")
+
     def __len__(self):
         """
         Return the number of instances in the data
