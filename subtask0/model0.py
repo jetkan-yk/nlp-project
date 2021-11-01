@@ -41,7 +41,7 @@ class Model0(nn.Module):
         return output
 
 
-def collator0(batch):
+def collate0(batch):
     """
     Collate function for DataLoader
     """
@@ -53,11 +53,8 @@ def collator0(batch):
     return texts, labels
 
 
-def evaluator0(preds, labels):
+def predict0(outputs):
     """
-    Evaluates the predicted results against the expected labels and
-    returns a score for the result batch
+    Given a batch output, predict the final result
     """
-    y_preds = torch.argmax(preds, dim=1)
-
-    return sum(labels == y_preds) / len(labels)
+    return torch.argmax(outputs, dim=1)

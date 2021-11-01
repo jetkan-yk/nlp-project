@@ -9,7 +9,7 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from subtask0.model0 import Model0, collator0
+from subtask0.model0 import Model0, collate0, predict0
 
 
 class NcgModelDemo:
@@ -29,7 +29,8 @@ class NcgModelDemo:
 
         if self.subtask == 0:
             self.model = Model0().to(self.device)
-            self.collator = collator0
+            self.collate = collate0
+            self.predict = predict0
         else:
             raise KeyError
 
@@ -43,7 +44,7 @@ class NcgModelDemo:
             train_data,
             NcgModelDemo.BATCH_SIZE,
             shuffle=True,
-            collate_fn=self.collator,
+            collate_fn=self.collate,
         )
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(
@@ -95,7 +96,7 @@ class NcgModelDemo:
         self.model = load_model(self.subtask, self.model, model_name)
 
         data_loader = DataLoader(
-            test_data, NcgModelDemo.BATCH_SIZE, collate_fn=self.collator
+            test_data, NcgModelDemo.BATCH_SIZE, collate_fn=self.collate
         )
         batch_score = 0.0
 
@@ -105,7 +106,8 @@ class NcgModelDemo:
                 features = data[0].to(self.device)
                 labels = data[1].to(self.device)
 
-                preds = self.model(features)
+                outputs = self.model(features)
+                preds = self.predict(outputs)
                 batch_score += evaluate(preds, labels)
 
         print(f"Accuracy: {batch_score / len(data_loader):.{3}}\n")
@@ -141,15 +143,14 @@ def evaluate(preds, labels):
     """
     tp = fp = fn = 0
 
-    for pred, label in zip(preds, labels):
-        tp_data = [i for i in pred if i in label]
-        tp = tp + len(tp_data)
+    tp_data = [i for i in preds if i in labels]
+    tp = tp + len(tp_data)
 
-        fp_data = [i for i in pred if i not in label]
-        fp = fp + len(fp_data)
+    fp_data = [i for i in preds if i not in labels]
+    fp = fp + len(fp_data)
 
-        fn_data = [i for i in label if i not in pred]
-        fn = fn + len(fn_data)
+    fn_data = [i for i in labels if i not in preds]
+    fn = fn + len(fn_data)
 
     return fscore(tp, fp, fn)
 
