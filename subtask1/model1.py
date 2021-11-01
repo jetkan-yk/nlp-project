@@ -19,9 +19,16 @@ class Model1(nn.Module):
         raise NotImplementedError
 
 
-def collator1(batch):
+def collate1(batch):
     """
     Collate function for DataLoader
     """
-    # TODO: Implement collator here
+    # TODO: Implement collate here
+    raise NotImplementedError
+
+def predict1(outputs):
+    """
+    Given a batch output, predict the final result
+    """
+    # TODO: Implement predict here
     raise NotImplementedError
