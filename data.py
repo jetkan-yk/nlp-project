@@ -90,18 +90,13 @@ class NcgDatasetDemo(Dataset):
 
     def __len__(self):
         """
-        Return the number of instances in the data
+        Returns the number of samples in the dataset
         """
         return len(self.x)
 
     def __getitem__(self, i):
         """
-        Return the i-th instance in the format of:
-            (text, label)
-        Text and label should be encoded according to the vocab (word_id).
-        both text and label are recommended to be in pytorch tensor type.
-
-        DO NOT pad the tensor here, do it at the collator function.
+        Returns the i-th sample's `(x, y)` tuple
         """
         return self.x[i], self.y[i]
 

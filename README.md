@@ -9,5 +9,5 @@ This demo is code-named as `subtask0`, i.e. run `python3 main.py 0`.
 
 - `main.py` - main runner file of the project
 - `data.py` - loads, pre-processes data and implements the `NcgDatasetDemo` class, modified to fit the a2 dataset requirements
-- `model.py` - implements the `NcgModelDemo` class, minimally modified to load `subtask0` modules
-- `subtask0/model0.py` - subtask 0 implementations
+- `model.py` - loads, saves model and implements the `NcgModel` class, minimally modified to load `subtask0` modules
+- `subtask0/` - implements the `Model0` class and other subtask 0 helper functions

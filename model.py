@@ -1,5 +1,5 @@
 """
-Implements the NcgModelDemo class
+Loads, saves model and implements the `NcgModelDemo` class
 """
 
 import os
@@ -91,7 +91,7 @@ class NcgModelDemo:
 
     def test(self, test_data, model_name):
         """
-        Tests the model using `test_data`
+        Tests the `model_name` model in the subtask folder using `test_data`
         """
         self.model = load_model(self.subtask, self.model, model_name)
 
@@ -114,7 +114,7 @@ class NcgModelDemo:
 
 def save_model(subtask, model: nn.Module, model_name):
     """
-    Saves the model as `model_name` in the subtask folder.
+    Saves the model as `model_name` in the subtask folder
     """
     checkpoint = model.state_dict()
     model_path = os.path.join(f"subtask{subtask}", model_name)
@@ -125,7 +125,7 @@ def save_model(subtask, model: nn.Module, model_name):
 
 def load_model(subtask, model: nn.Module, model_name):
     """
-    Loads the model state from `model_name`in the subtask folder.
+    Loads the model from `model_name` in the subtask folder
     """
     model_path = os.path.join(f"subtask{subtask}", model_name)
 
