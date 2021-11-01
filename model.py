@@ -9,7 +9,7 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from demo.model0 import Model0, collator0, evaluator0
+from subtask0.model0 import Model0, collator0, evaluator0
 
 # Hyperparameters
 BATCH_SIZE = 20
