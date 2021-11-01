@@ -39,7 +39,7 @@ class NcgModel:
         else:
             raise KeyError
 
-        print(f"Initialized model\n{self.model}\n")
+        print(f"{self.model}\n")
 
     def train(self, train_data, model_name):
         """
@@ -90,7 +90,7 @@ class NcgModel:
                     )
                     running_loss = 0.0
         end = datetime.now()
-        print(f"Training finished in {(end - start).seconds / 60.0} minutes.\n")
+        print(f"\nTraining finished in {(end - start).seconds / 60.0} minutes.\n")
 
         save_model(self.subtask, self.model, model_name)
 
