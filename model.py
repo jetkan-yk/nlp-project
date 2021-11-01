@@ -79,10 +79,9 @@ class NcgModelDemo:
                 # print loss value every 100 steps and reset the running loss
                 if step % 100 == 99:
                     print(
-                        "[%d, %5d] loss: %.3f"
-                        % (epoch + 1, step + 1, running_loss / 100)
+                        f"[{epoch + 1}, {step + 1:{4}}] loss: {running_loss / 100:.{3}}"
                     )
-                running_loss = 0.0
+                    running_loss = 0.0
         end = datetime.now()
         print(f"Training finished in {(end - start).seconds / 60.0} minutes.")
 
