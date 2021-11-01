@@ -1,8 +1,7 @@
 # CS4248 G17 NLP Project - Demo A2
 
-
 The purpose of this demo branch is to show how the `main.py`, `data.py` and `model.py` interacts with each other by emulating
-the input & output of CS4248 Assignment 2. 
+the input & output of CS4248 Assignment 2.
 
 It is also used as a proof of concept when developing the skeleton code.
 
