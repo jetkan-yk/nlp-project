@@ -46,7 +46,7 @@ class collator:
         self.tokenizer = AutoTokenizer.from_pretrained('allenai/scibert_scivocab_uncased')
         # predefined collator that pads tensors
         # max length is determined from data exploration
-        self.collator = DataCollatorWithPadding(self.tokenizer, padding=True, max_length=100)
+        self.collator = DataCollatorWithPadding(self.tokenizer, padding='max_length', max_length=100)
 
     def __call__(self, batch):
         """
