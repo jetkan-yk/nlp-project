@@ -30,7 +30,7 @@ class NcgModel:
 
         if self.subtask == 1:
             self.model = Model1().to(self.device)
-            self.collate = collate1
+            self.collate = collate1()
             self.predict = predict1
         elif self.subtask == 2:
             self.model = Model2().to(self.device)
