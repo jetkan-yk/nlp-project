@@ -24,6 +24,8 @@ automated systems that structure contributions from NLP scholarly articles in En
 - [Python 3.8 or 3.9](https://www.python.org/downloads/)
 - [PyTorch](https://pytorch.org/get-started/locally/)
 
+Additionally, run `pip install -r requirements.txt` to install other Python dependencies.
+
 ### How To Run
 
 1. Make sure you have installed all the dependencies mentioned above
@@ -36,17 +38,21 @@ automated systems that structure contributions from NLP scholarly articles in En
 
 ### Useful flags
 
-These flags can be combined into one single command line:
+These optional flags can be combined into one single command line:
 
-- Use `-d [data_dir/]` to specify which dataset folder to use
-- Use `-m [model_name]` to specify the model filename to generate
+- Use `-d [data_dir/]` to specify which dataset folder to use, default: `data/`
+- Use `-m [model_name]` to specify the model filename to generate, default: `model/`
 - _(WIP)_ Use `-s [summary_name]` to specify the summary filename to write
 - Use `--train` to train model only
 - Use `--test` to test model only
 
-#### Example
+#### Examples
+
+`python3 main.py 1`
 
 `python3 main.py 1 -d data-small/ -m sci-bert`
+
+`python3 main.py 2 --train`
 
 ## Project Structure
 

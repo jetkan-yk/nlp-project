@@ -12,10 +12,12 @@ class Model1(nn.Module):
     """
     A `PyTorch nn.Module` subclass for subtask 1.
     """
+
     def __init__(self):
         super().__init__()
         # Replace pretraining head of the BERT model with a classification head which is randomly initialized
         self.model = AutoModelForSequenceClassification.from_pretrained('allenai/scibert_scivocab_uncased', num_labels=2)
+        self.collator = collator()
 
     def forward(self, x):
         # takes in batch data and passes it through model
@@ -25,10 +27,21 @@ class Model1(nn.Module):
         outputs = self.model(input_ids, attention_mask=attention_mask)
         return outputs.logits
 
-class collate1:
+    def collate(self, batch):
+        return self.collator(batch)
+
+    def predict(self, outputs):
+        """
+        Maps predicted batch outputs to labels
+        """
+        return torch.argmax(outputs, dim=1)
+
+
+class collator:
     """
     Collate function class for DataLoader
     """
+
     def __init__(self):
         self.tokenizer = AutoTokenizer.from_pretrained('allenai/scibert_scivocab_uncased')
         # predefined collator that pads tensors

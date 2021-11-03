@@ -9,8 +9,8 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from subtask1.model1 import Model1, collate1, predict1
-from subtask2.model2 import Model2, collate2, predict2
+from subtask1.model1 import Model1
+from subtask2.model2 import Model2
 
 
 class NcgModel:
@@ -30,12 +30,8 @@ class NcgModel:
 
         if self.subtask == 1:
             self.model = Model1().to(self.device)
-            self.collate = collate1()
-            self.predict = predict1
         elif self.subtask == 2:
             self.model = Model2().to(self.device)
-            self.collate = collate2
-            self.predict = predict2
         else:
             raise KeyError
 
@@ -49,7 +45,7 @@ class NcgModel:
             train_data,
             NcgModel.BATCH_SIZE,
             shuffle=True,
-            collate_fn=self.collate,
+            collate_fn=self.model.collate,
         )
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(
@@ -101,7 +97,7 @@ class NcgModel:
         self.model = load_model(self.subtask, self.model, model_name)
 
         data_loader = DataLoader(
-            test_data, NcgModel.BATCH_SIZE, collate_fn=self.collate
+            test_data, NcgModel.BATCH_SIZE, collate_fn=self.model.collate
         )
         batch_score = 0.0
 
@@ -112,7 +108,7 @@ class NcgModel:
                 labels = data[1].to(self.device)
 
                 outputs = self.model(features)
-                preds = self.predict(outputs)
+                preds = self.model.predict(outputs)
                 batch_score += evaluate(preds, labels)
 
         print(f"Accuracy: {batch_score / len(data_loader):.{3}}\n")
