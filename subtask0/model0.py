@@ -40,21 +40,19 @@ class Model0(nn.Module):
         output = F.relu(self.output(h1))
         return output
 
+    def collate(self, batch):
+        """
+        Collate function for DataLoader
+        """
+        texts, labels = zip(*batch)
 
-def collate0(batch):
-    """
-    Collate function for DataLoader
-    """
-    texts, labels = zip(*batch)
+        texts = nn.utils.rnn.pad_sequence(texts, batch_first=True)
+        labels = torch.tensor(labels)
 
-    texts = nn.utils.rnn.pad_sequence(texts, batch_first=True)
-    labels = torch.tensor(labels)
+        return texts, labels
 
-    return texts, labels
-
-
-def predict0(outputs):
-    """
-    Given a batch output, predict the final result
-    """
-    return torch.argmax(outputs, dim=1)
+    def predict(self, outputs):
+        """
+        Given a batch output, predict the final result
+        """
+        return torch.argmax(outputs, dim=1)
