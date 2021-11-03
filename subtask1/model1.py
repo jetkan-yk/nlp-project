@@ -23,7 +23,7 @@ class Model1(nn.Module):
     def collate(self, batch):
         return self.collator(batch)
 
-    def predict(outputs):
+    def predict(self, outputs):
         """
         Maps predicted batch outputs to labels
         """
