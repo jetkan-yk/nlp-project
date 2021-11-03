@@ -89,9 +89,10 @@ class NcgDataset(Dataset):
         y = a list of phrases (a list of `string`)
     """
 
-    def __init__(self, subtask, data_dir):
+    def __init__(self, subtask, data_dir, pipeline1):
         self.subtask = subtask
         self.names, self.articles, self.sents, self.phrases = load_data(data_dir)
+        self.pipeline1 = pipeline1
 
         if self.subtask == 1:
             self._init_subtask1()
@@ -108,10 +109,32 @@ class NcgDataset(Dataset):
         """
         self.x = []
         self.y = []
-        for idx, sent_list in enumerate(self.sents):
-            for sent in sent_list:
-                self.x.append(idx)
-                self.y.append((idx, sent))
+        
+        # formats data for classification task (sent, label), where label == 1 for contributing sents for label == 0 otherwise
+        if self.pipeline1 == "classification":
+            for idx, sent_list in enumerate(self.sents):
+                # get list of sentences in paper
+                paper_sents = self._stringify(idx)
+
+                # separate into contributing and non-contributing sentences
+                contributing_sents = [self._stringify((idx, sent)) for sent in sent_list]
+                non_contributing_sents = [x for x in paper_sents if x not in contributing_sents]
+
+                # appends appropriate labels
+                for sent in contributing_sents:
+                    self.x.append(sent)
+                    self.y.append(1)
+
+                for sent in non_contributing_sents:
+                    self.x.append(sent)
+                    self.y.append(0)
+                
+        else:
+            # formats data into (paper, contributing sentence)
+            for idx, sent_list in enumerate(self.sents):
+                for sent in sent_list:
+                    self.x.append(self._stringify(idx))
+                    self.y.append(self._stringify((idx, sent)))
 
     def _init_subtask2(self):
         """
@@ -121,8 +144,8 @@ class NcgDataset(Dataset):
         self.y = []
         for idx, phrase_dict in enumerate(self.phrases):
             for sent, phrase in phrase_dict.items():
-                self.x.append((idx, sent))
-                self.y.append(phrase)
+                self.x.append(self._stringify((idx, sent)))
+                self.y.append(self._stringify(phrase))
 
     def __len__(self):
         """
@@ -134,7 +157,7 @@ class NcgDataset(Dataset):
         """
         Returns the i-th sample's `(x, y)` tuple
         """
-        return self._stringify(self.x[i]), self._stringify(self.y[i])
+        return self.x[i], self.y[i]
 
     def _stringify(self, data):
         """
