@@ -209,7 +209,7 @@ def evaluate(preds, labels):
     Evaluates the predicted results against the expected labels and
     returns a f1score for the result batch
     """
-    tp = fp = fn = 0
+    tp = fp = fn = tn = 0
     
     for pred, label in zip(preds, labels):
         if pred == 1 and label == 1:
@@ -218,8 +218,11 @@ def evaluate(preds, labels):
             fp += 1
         if pred == 0 and label == 1:
             fn += 1
-
-    print((tp, fp, fn))
+        if pred == 0 and label == 0:
+            tn += 1
+            
+    # TODO: remove
+    print((tp, fp, tn, fn))
     return f1_score(tp, fp, fn)
 
 
