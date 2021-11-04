@@ -34,7 +34,8 @@ class Model1(nn.Module):
         """
         Maps predicted batch outputs to labels
         """
-        return torch.argmax(outputs, dim=1)
+        predictions = torch.argmax(outputs, dim=-1)
+        return predictions
 
 
 class collator:
@@ -76,11 +77,3 @@ class collator:
         feature_tensors = self.collator(features) # creates a dict containing {'attention_mask', 'input_ids', 'token_type_ids', 'labels'}
 
         return feature_tensors, torch.LongTensor(labels)
-
-def predict1(outputs):
-    """
-    Maps predicted batch outputs to labels
-    """
-    predictions = torch.argmax(outputs, dim=-1)
-
-    return predictions

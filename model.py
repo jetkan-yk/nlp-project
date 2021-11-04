@@ -12,7 +12,6 @@ from torch.utils.data import DataLoader
 from subtask1.model1 import Model1
 from subtask2.model2 import Model2
 
-
 class NcgModel:
     """
     A model class that is powered by a `PyTorch nn.Module` subclass.
@@ -140,25 +139,30 @@ def load_model(subtask, model: nn.Module, model_name):
 def evaluate(preds, labels):
     """
     Evaluates the predicted results against the expected labels and
-    returns a fscore for the result batch
+    returns a f1score for the result batch
     """
     tp = fp = fn = 0
-
+    
     for pred, label in zip(preds, labels):
-        tp_data = [i for i in pred if i in label]
-        tp = tp + len(tp_data)
+        if pred == 1 and label == 1:
+            tp += 1
+        if pred == 1 and label == 0:
+            fp += 1
+        if pred == 0 and label == 1:
+            fn += 1
 
-        fp_data = [i for i in pred if i not in label]
-        fp = fp + len(fp_data)
-
-        fn_data = [i for i in label if i not in pred]
-        fn = fn + len(fn_data)
-
-    return fscore(tp, fp, fn)
+    return f1_score(tp, fp, fn)
 
 
-def fscore(tp, fp, fn):
+def f1_score(tp, fp, fn):
     """
     Computes the fscore using the tp, fp, fn
+    When true positive + false positive == 0, precision is undefined. 
+    When true positive + false negative == 0, recall is undefined. 
+    In such cases, by default the metric will be set to 0, as will f-score
     """
+    
+    if (tp + 0.5 * (fp + fn)) == 0:
+        return 0
+
     return tp / (tp + 0.5 * (fp + fn))
