@@ -1,1 +1,1 @@
-python3 main.py 1 -d data-small/ -m model1 --test
+python3 main.py 1 -d data-small/ -m model1 

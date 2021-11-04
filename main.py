@@ -14,7 +14,7 @@ TRAIN_RATIO = 0.8
 
 
 def main(args):
-    dataset = NcgDataset(args.subtask, args.d, args.pipeline1)
+    dataset = NcgDataset(args.subtask, args.d, args.pipeline1, args.pipeline2)
     train_data, test_data = train_test_split(dataset)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -46,6 +46,8 @@ def parse_args():
     parser.add_argument("-d", default="data", type=str, help="specify data directory")
     parser.add_argument("-m", default="model", type=str, help="specify model name")
     parser.add_argument("-pipeline1", default="classification", type=str, help="specify pipeline for subtask1")
+    parser.add_argument("-pipeline2", default="classification", type=str, help="specify pipeline for subtask2")
+
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--train", action="store_true", help="train model only")
