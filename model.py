@@ -7,13 +7,16 @@ from datetime import datetime
 
 import torch
 from torch import nn, optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 
 from subtask1.model1 import Model1
 from subtask2.model2 import Model2
 
 from subtask1.config1 import Config1
 from subtask2.config2 import Config2
+
+from collections import defaultdict
+import numpy as np
 
 class NcgModel:
     """
@@ -38,14 +41,66 @@ class NcgModel:
         
     def load_dataloader(self, data):
         if self.config.SAMPLING_STRAT == "oversampling":
-            pass
-        
-        return DataLoader(
-                data,
-                self.config.BATCH_SIZE,
-                shuffle=True,
-                collate_fn=self.model.collate,
-            )
+            if self.config.PIPELINE == "classification":
+                # oversampling with replacement, used to correct class imbalance for classification
+                # data is of format (feature, int_label)
+                assert(len(data[0]) == 2
+                        and type(data[0][0]) == str
+                        and type(data[0][1]) == int)
+                
+                features, labels = zip(*data)
+                labels = list(labels)
+                classes = np.unique(labels)
+                
+                # gets distribution of class labels
+                count_dict = defaultdict(lambda:0, {})
+                for label in labels:
+                    count_dict[label] += 1
+                
+                # gets class weights for sampling by taking reciprocal of class counts
+                class_count = [count_dict[i] for i in classes]
+                class_weights = (1./torch.tensor(class_count, dtype=torch.float)).tolist() 
+  
+                # list of weights denoting probability of sample of corresponding indice being sampled
+                sample_weights = [class_weights[i] for i in labels] 
+                sampler = WeightedRandomSampler(
+                        weights=sample_weights,
+                        num_samples=len(sample_weights),
+                        replacement=True
+                    )
+                                
+                if False:
+                    # checks if sampling was correctly performed
+                    loader = DataLoader(
+                        data,
+                        batch_size=len(data),
+                        sampler=sampler,
+                    )
+
+                    sampled_labels = next(iter(loader))[1].tolist()
+                    sampled_count_dict = defaultdict(lambda:0, {})
+
+                    for label in sampled_labels:
+                        sampled_count_dict[label] += 1
+
+                    print(sampled_count_dict)
+                    exit()
+
+                return DataLoader(
+                    data,
+                    batch_size=self.config.BATCH_SIZE,
+                    sampler=sampler,
+                    collate_fn=self.model.collate,
+                )
+                
+        else: 
+            # default sampling method: shuffling of data
+            return DataLoader(
+                    data,
+                    batch_size=self.config.BATCH_SIZE,
+                    shuffle=True,
+                    collate_fn=self.model.collate,
+                )
     
     def load_criterion(self):
         return nn.CrossEntropyLoss()
@@ -53,10 +108,10 @@ class NcgModel:
     def load_optimizer(self):
         if self.config.OPTIMIZER == "adam":
             return optim.Adam(self.model.parameters(), lr=self.config.LEARNING_RATE)
-            
-        return optim.SGD(
-            self.model.parameters(), self.config.LEARNING_RATE, self.config.MOMENTUM
-        )
+        else:
+            return optim.SGD(
+                self.model.parameters(), self.config.LEARNING_RATE, self.config.MOMENTUM
+            )
 
     def train(self, train_data, model_name):
         """
@@ -164,6 +219,7 @@ def evaluate(preds, labels):
         if pred == 0 and label == 1:
             fn += 1
 
+    print((tp, fp, fn))
     return f1_score(tp, fp, fn)
 
 

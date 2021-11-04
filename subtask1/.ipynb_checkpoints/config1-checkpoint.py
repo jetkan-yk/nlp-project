@@ -2,6 +2,7 @@
 Contains hyperparameters for subtask 1.
 """
 class Config1:
+    PIPELINE = "classification"
     BATCH_SIZE = 20
     LEARNING_RATE = 0.3
     MOMENTUM = 0.8
