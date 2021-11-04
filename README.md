@@ -23,8 +23,9 @@ automated systems that structure contributions from NLP scholarly articles in En
 
 - [Python 3.8 or 3.9](https://www.python.org/downloads/)
 - [PyTorch](https://pytorch.org/get-started/locally/)
+- [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html)
 
-Additionally, run `pip install -r requirements.txt` to install other Python dependencies.
+Additionally, run `conda env export --name env > environment.yml` to install other Python dependencies.
 
 ### How To Run
 
