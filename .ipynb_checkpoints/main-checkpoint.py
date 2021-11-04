@@ -45,8 +45,8 @@ def parse_args():
     parser.add_argument("subtask", choices=[1, 2], type=int, help="choose subtask")
     parser.add_argument("-d", default="data", type=str, help="specify data directory")
     parser.add_argument("-m", default="model", type=str, help="specify model name")
-    parser.add_argument("-pipeline1", default="classification", type=str, help="specify pipeline for subtask1")
-    parser.add_argument("-pipeline2", default="classification", type=str, help="specify pipeline for subtask2")
+    parser.add_argument("-pipeline1", default="default", type=str, help="specify pipeline for subtask1")
+    parser.add_argument("-pipeline2", default="default", type=str, help="specify pipeline for subtask2")
 
 
     group = parser.add_mutually_exclusive_group()
