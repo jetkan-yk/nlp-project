@@ -3,6 +3,8 @@ from collections import defaultdict
 
 from torch.utils.data import Dataset
 
+from .config1 import Config1
+
 class Dataset1(Dataset):
     """
     A `PyTorch Dataset` class that accepts a subtask number and a data directory.
@@ -12,7 +14,7 @@ class Dataset1(Dataset):
         y = a contributing sentence (a `string`)
     """
 
-    def __init__(self, names, articles, sents, phrases, pipeline):
+    def __init__(self, names, articles, sents, phrases):
         """
         Initializes the dataset for subtask 1
         """
@@ -20,14 +22,13 @@ class Dataset1(Dataset):
         self.articles = articles
         self.sents = sents
         self.phrases = phrases
-        self.pipeline = pipeline
 
         self.x = []
         self.y = []
         
         # formats data for classification task (sent, label), 
         # where label == 1 for contributing sentences for label == 0 otherwise
-        if self.pipeline == "classification":
+        if Config1.PIPELINE == "classification":
             for idx, sent_list in enumerate(self.sents):
                 # get list of sentences in paper
                 paper_sents = self._stringify(idx)

@@ -91,16 +91,16 @@ class NcgDataset(Dataset):
         y = a list of phrases (a list of `string`)
     """
 
-    def __init__(self, subtask, data_dir, pipeline1, pipeline2):
+    def __init__(self, subtask, data_dir):
         self.subtask = subtask
         names, articles, sents, phrases = load_data(data_dir)
         
         print(f"Loaded data from {data_dir}\n")
 
         if self.subtask == 1:
-            self.dataset = Dataset1(names, articles, sents, phrases, pipeline1)
+            self.dataset = Dataset1(names, articles, sents, phrases)
         elif self.subtask == 2:
-            self.dataset = Dataset2(names, articles, sents, phrases, pipeline2)
+            self.dataset = Dataset2(names, articles, sents, phrases)
         else:
             raise KeyError
 

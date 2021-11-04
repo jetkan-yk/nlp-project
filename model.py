@@ -12,47 +12,62 @@ from torch.utils.data import DataLoader
 from subtask1.model1 import Model1
 from subtask2.model2 import Model2
 
+from subtask1.config1 import Config1
+from subtask2.config2 import Config2
+
 class NcgModel:
     """
     A model class that is powered by a `PyTorch nn.Module` subclass.
     """
 
-    # Hyperparameters
-    BATCH_SIZE = 20
-    LEARNING_RATE = 0.3
-    MOMENTUM = 0.8
-    EPOCHS = 10
-
     def __init__(self, subtask, device):
         self.subtask = subtask
         self.device = device
-
+        
+        # determines hyperparameters, model for each subtask
         if self.subtask == 1:
+            self.config = Config1
             self.model = Model1().to(self.device)
         elif self.subtask == 2:
+            self.config = Config2
             self.model = Model2().to(self.device)
         else:
             raise KeyError
 
         print(f"{self.model}\n")
+        
+    def load_dataloader(self, data):
+        if self.config.SAMPLING_STRAT == "oversampling":
+            pass
+        
+        return DataLoader(
+                data,
+                self.config.BATCH_SIZE,
+                shuffle=True,
+                collate_fn=self.model.collate,
+            )
+    
+    def load_criterion(self):
+        return nn.CrossEntropyLoss()
+        
+    def load_optimizer(self):
+        if self.config.OPTIMIZER == "adam":
+            return optim.Adam(self.model.parameters(), lr=self.config.LEARNING_RATE)
+            
+        return optim.SGD(
+            self.model.parameters(), self.config.LEARNING_RATE, self.config.MOMENTUM
+        )
 
     def train(self, train_data, model_name):
         """
         Trains the model using `train_data` and saves the model in `model_name`
         """
-        data_loader = DataLoader(
-            train_data,
-            NcgModel.BATCH_SIZE,
-            shuffle=True,
-            collate_fn=self.model.collate,
-        )
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(
-            self.model.parameters(), NcgModel.LEARNING_RATE, NcgModel.MOMENTUM
-        )
+        data_loader = self.load_dataloader(train_data)
+        criterion = self.load_criterion()
+        optimizer = self.load_optimizer()
 
         start = datetime.now()
-        for epoch in range(NcgModel.EPOCHS):
+        for epoch in range(self.config.EPOCHS):
             self.model.train()
             running_loss = 0.0
 
@@ -95,9 +110,7 @@ class NcgModel:
         """
         self.model = load_model(self.subtask, self.model, model_name)
 
-        data_loader = DataLoader(
-            test_data, NcgModel.BATCH_SIZE, collate_fn=self.model.collate
-        )
+        data_loader = self.load_dataloader(test_data)
         batch_score = 0.0
 
         self.model.eval()

@@ -46,8 +46,6 @@ These optional flags can be combined into one single command line:
 - _(WIP)_ Use `-s [summary_name]` to specify the summary filename to write
 - Use `--train` to train model only
 - Use `--test` to test model only
-- Use `--pipeline1` to specify alternate data processing pipelines for subtask1, default: `default`
-- Use `--pipeline2` to specify alternate data processing pipelines for subtask2, default: `default`
 
 #### Examples
 

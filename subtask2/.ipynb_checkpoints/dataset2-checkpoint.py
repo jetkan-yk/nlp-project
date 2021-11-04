@@ -12,7 +12,7 @@ class Dataset2(Dataset):
         y = a list of phrases (a list of `string`)
     """
 
-    def __init__(self, names, articles, sents, phrases, pipeline):
+    def __init__(self, names, articles, sents, phrases):
         """
         Initializes the dataset for subtask 2
         """
@@ -20,7 +20,6 @@ class Dataset2(Dataset):
         self.articles = articles
         self.sents = sents
         self.phrases = phrases
-        self.pipeline = pipeline
         
         self.x = []
         self.y = []
