@@ -7,6 +7,9 @@ from collections import defaultdict
 
 from torch.utils.data import Dataset
 
+from subtask1.dataset1 import Dataset1
+from subtask2.dataset2 import Dataset2
+
 
 def load_data(data_dir):
     """
@@ -91,61 +94,25 @@ class NcgDataset(Dataset):
 
     def __init__(self, subtask, data_dir):
         self.subtask = subtask
-        self.names, self.articles, self.sents, self.phrases = load_data(data_dir)
-
-        if self.subtask == 1:
-            self._init_subtask1()
-        elif self.subtask == 2:
-            self._init_subtask2()
-        else:
-            raise KeyError
+        names, articles, sents, phrases = load_data(data_dir)
 
         print(f"Loaded data from {data_dir}\n")
 
-    def _init_subtask1(self):
-        """
-        Initializes the dataset for subtask 1
-        """
-        self.x = []
-        self.y = []
-        for idx, sent_list in enumerate(self.sents):
-            for sent in sent_list:
-                self.x.append(idx)
-                self.y.append((idx, sent))
-
-    def _init_subtask2(self):
-        """
-        Initializes the dataset for subtask 2
-        """
-        self.x = []
-        self.y = []
-        for idx, phrase_dict in enumerate(self.phrases):
-            for sent, phrase in phrase_dict.items():
-                self.x.append((idx, sent))
-                self.y.append(phrase)
+        if self.subtask == 1:
+            self.dataset = Dataset1(names, articles, sents, phrases)
+        elif self.subtask == 2:
+            self.dataset = Dataset2(names, articles, sents, phrases)
+        else:
+            raise KeyError
 
     def __len__(self):
         """
         Returns the number of samples in the dataset
         """
-        return len(self.x)
+        return len(self.dataset)
 
     def __getitem__(self, i):
         """
         Returns the i-th sample's `(x, y)` tuple
         """
-        return self._stringify(self.x[i]), self._stringify(self.y[i])
-
-    def _stringify(self, data):
-        """
-        Converts the article or sentence index into `string`
-        """
-        if isinstance(data, list):
-            return data
-        elif isinstance(data, tuple):
-            idx, sent = data
-            return self.articles[idx][sent]
-        elif isinstance(data, int):
-            return self.articles[data]
-        else:
-            raise KeyError
+        return self.dataset[i]
