@@ -96,7 +96,7 @@ The data folders is organized as follows:
 ### Branches
 
 - `main` - root branch
-- `demo-a2` - a demo mode that emulates assignment 2's dataset & model
+- `demo-a2` - a demo mode that emulates assignment 2's dataset & model _(deprecated)_
 - `subtask1` - development branch for subtask 1
 - `subtask2` - development branch for subtask 2
 
