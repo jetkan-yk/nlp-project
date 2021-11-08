@@ -6,8 +6,10 @@ import os
 from collections import defaultdict
 
 from torch.utils.data import Dataset
+
 from subtask1.dataset1 import Dataset1
 from subtask2.dataset2 import Dataset2
+
 
 def load_data(data_dir):
     """
@@ -77,7 +79,6 @@ def parse_phrase(phrase_str_list: list[str]):
     return phrase_dict
 
 
-
 class NcgDataset(Dataset):
     """
     A `PyTorch Dataset` class that accepts a subtask number and a data directory.
@@ -94,7 +95,7 @@ class NcgDataset(Dataset):
     def __init__(self, subtask, data_dir):
         self.subtask = subtask
         names, articles, sents, phrases = load_data(data_dir)
-        
+
         print(f"Loaded data from {data_dir}\n")
 
         if self.subtask == 1:
