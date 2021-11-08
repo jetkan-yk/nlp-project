@@ -3,20 +3,19 @@ Loads, saves model and implements the `NcgModel` class
 """
 
 import os
+from collections import defaultdict
 from datetime import datetime
 
+import numpy as np
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, WeightedRandomSampler
 
+from subtask1.config1 import Config1
 from subtask1.model1 import Model1
+from subtask2.config2 import Config2
 from subtask2.model2 import Model2
 
-from subtask1.config1 import Config1
-from subtask2.config2 import Config2
-
-from collections import defaultdict
-import numpy as np
 
 class NcgModel:
     """
@@ -26,7 +25,7 @@ class NcgModel:
     def __init__(self, subtask, device):
         self.subtask = subtask
         self.device = device
-        
+
         # determines hyperparameters, model for each subtask
         if self.subtask == 1:
             self.config = Config1
@@ -38,37 +37,41 @@ class NcgModel:
             raise KeyError
 
         print(f"{self.model}\n")
-        
-    def load_dataloader(self, data):
+
+    def _dataloader(self, data):
         if self.config.SAMPLING_STRAT == "oversampling":
             if self.config.PIPELINE == "classification":
                 # oversampling with replacement, used to correct class imbalance for classification
                 # data is of format (feature, int_label)
-                assert(len(data[0]) == 2
-                        and type(data[0][0]) == str
-                        and type(data[0][1]) == int)
-                
+                assert (
+                    len(data[0]) == 2
+                    and type(data[0][0]) == str
+                    and type(data[0][1]) == int
+                )
+
                 features, labels = zip(*data)
                 labels = list(labels)
                 classes = np.unique(labels)
-                
+
                 # gets distribution of class labels
-                count_dict = defaultdict(lambda:0, {})
+                count_dict = defaultdict(lambda: 0, dict())
                 for label in labels:
                     count_dict[label] += 1
-                
+
                 # gets class weights for sampling by taking reciprocal of class counts
                 class_count = [count_dict[i] for i in classes]
-                class_weights = (1./torch.tensor(class_count, dtype=torch.float)).tolist() 
-  
+                class_weights = (
+                    1.0 / torch.tensor(class_count, dtype=torch.float)
+                ).tolist()
+
                 # list of weights denoting probability of sample of corresponding indice being sampled
-                sample_weights = [class_weights[i] for i in labels] 
+                sample_weights = [class_weights[i] for i in labels]
                 sampler = WeightedRandomSampler(
-                        weights=sample_weights,
-                        num_samples=len(sample_weights),
-                        replacement=True
-                    )
-                                
+                    weights=sample_weights,
+                    num_samples=len(sample_weights),
+                    replacement=True,
+                )
+
                 if False:
                     # checks if sampling was correctly performed
                     loader = DataLoader(
@@ -78,7 +81,7 @@ class NcgModel:
                     )
 
                     sampled_labels = next(iter(loader))[1].tolist()
-                    sampled_count_dict = defaultdict(lambda:0, {})
+                    sampled_count_dict = defaultdict(lambda: 0, {})
 
                     for label in sampled_labels:
                         sampled_count_dict[label] += 1
@@ -92,22 +95,22 @@ class NcgModel:
                     sampler=sampler,
                     collate_fn=self.model.collate,
                 )
-                
-        else: 
+
+        else:
             # default sampling method: shuffling of data
             return DataLoader(
-                    data,
-                    batch_size=self.config.BATCH_SIZE,
-                    shuffle=True,
-                    collate_fn=self.model.collate,
-                )
-    
-    def load_criterion(self):
+                data,
+                batch_size=self.config.BATCH_SIZE,
+                shuffle=True,
+                collate_fn=self.model.collate,
+            )
+
+    def _criterion(self):
         return nn.CrossEntropyLoss()
-        
-    def load_optimizer(self):
+
+    def _optimizer(self):
         if self.config.OPTIMIZER == "adam":
-            return optim.Adam(self.model.parameters(), lr=self.config.LEARNING_RATE)
+            return optim.Adam(self.model.parameters(), self.config.LEARNING_RATE)
         else:
             return optim.SGD(
                 self.model.parameters(), self.config.LEARNING_RATE, self.config.MOMENTUM
@@ -117,9 +120,9 @@ class NcgModel:
         """
         Trains the model using `train_data` and saves the model in `model_name`
         """
-        data_loader = self.load_dataloader(train_data)
-        criterion = self.load_criterion()
-        optimizer = self.load_optimizer()
+        data_loader = self._dataloader(train_data)
+        criterion = self._criterion()
+        optimizer = self._optimizer()
 
         start = datetime.now()
         for epoch in range(self.config.EPOCHS):
@@ -165,7 +168,7 @@ class NcgModel:
         """
         self.model = load_model(self.subtask, self.model, model_name)
 
-        data_loader = self.load_dataloader(test_data)
+        data_loader = self._dataloader(test_data)
         batch_score = 0.0
 
         self.model.eval()
@@ -207,10 +210,10 @@ def load_model(subtask, model: nn.Module, model_name):
 def evaluate(preds, labels):
     """
     Evaluates the predicted results against the expected labels and
-    returns a f1score for the result batch
+    returns a f1-score for the result batch
     """
     tp = fp = fn = tn = 0
-    
+
     for pred, label in zip(preds, labels):
         if pred == 1 and label == 1:
             tp += 1
@@ -220,20 +223,18 @@ def evaluate(preds, labels):
             fn += 1
         if pred == 0 and label == 0:
             tn += 1
-            
-    # TODO: remove
-    print((tp, fp, tn, fn))
+
     return f1_score(tp, fp, fn)
 
 
 def f1_score(tp, fp, fn):
     """
     Computes the fscore using the tp, fp, fn
-    When true positive + false positive == 0, precision is undefined. 
-    When true positive + false negative == 0, recall is undefined. 
+    When true positive + false positive == 0, precision is undefined.
+    When true positive + false negative == 0, recall is undefined.
     In such cases, by default the metric will be set to 0, as will f-score
     """
-    
+
     if (tp + 0.5 * (fp + fn)) == 0:
         return 0
 

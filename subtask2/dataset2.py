@@ -1,7 +1,5 @@
-import os
-from collections import defaultdict
-
 from torch.utils.data import Dataset
+
 
 class Dataset2(Dataset):
     """
@@ -20,7 +18,7 @@ class Dataset2(Dataset):
         self.articles = articles
         self.sents = sents
         self.phrases = phrases
-        
+
         self.x = []
         self.y = []
         for idx, phrase_dict in enumerate(self.phrases):

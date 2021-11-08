@@ -1,6 +1,8 @@
 """
 Contains hyperparameters for subtask 1.
 """
+
+
 class Config1:
     PIPELINE = "classification"
     BATCH_SIZE = 32

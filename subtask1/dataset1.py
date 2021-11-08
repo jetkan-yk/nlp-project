@@ -1,9 +1,7 @@
-import os
-from collections import defaultdict
-
 from torch.utils.data import Dataset
 
 from .config1 import Config1
+
 
 class Dataset1(Dataset):
     """
@@ -25,8 +23,8 @@ class Dataset1(Dataset):
 
         self.x = []
         self.y = []
-        
-        # formats data for classification task (sent, label), 
+
+        # formats data for classification task (sent, label),
         # where label == 1 for contributing sentences for label == 0 otherwise
         if Config1.PIPELINE == "classification":
             for idx, sent_list in enumerate(self.sents):
@@ -34,8 +32,12 @@ class Dataset1(Dataset):
                 paper_sents = self._stringify(idx)
 
                 # separate into contributing and non-contributing sentences
-                contributing_sents = [self._stringify((idx, sent)) for sent in sent_list]
-                non_contributing_sents = [x for x in paper_sents if x not in contributing_sents]
+                contributing_sents = [
+                    self._stringify((idx, sent)) for sent in sent_list
+                ]
+                non_contributing_sents = [
+                    x for x in paper_sents if x not in contributing_sents
+                ]
 
                 # appends appropriate labels
                 for sent in contributing_sents:
@@ -45,7 +47,7 @@ class Dataset1(Dataset):
                 for sent in non_contributing_sents:
                     self.x.append(sent)
                     self.y.append(0)
-                
+
         else:
             # formats data into (paper, contributing sentence)
             for idx, sent_list in enumerate(self.sents):
