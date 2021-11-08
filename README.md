@@ -126,6 +126,15 @@ NCG Task [Paper](https://arxiv.org/pdf/2106.07385.pdf) [GitHub](https://github.c
 
 7. YNU-HPCC [Paper](https://aclanthology.org/2021.semeval-1.58.pdf) [GitHub](https://github.com/maxinge8698/SemEval2021-Task11)
 
+### Using the SOC Cluster Nodes
+
+1. Connect to the SoC network via NUS WiFi, SoC VPN or Sunfire
+   > `ssh your_soc_id@sunfire.comp.nus.edu.sg`
+2. SSH to any of the `xgpg0` to `xgpg2` nodes
+   > `ssh xgpg0`
+3. Use SCP to transfer files
+   > `scp -r nlp-project your_soc_id@sunfire.comp.nus.edu.sg:~/`
+
 ## Project Requirement
 
 The breakdown of the final project marks will be according to the following criteria:
