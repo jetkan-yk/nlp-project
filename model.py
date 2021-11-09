@@ -10,6 +10,7 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, WeightedRandomSampler
 
+from config import Optimizer, Pipeline, Sampling
 from subtask1.config1 import Config1
 from subtask1.model1 import Model1
 from subtask2.config2 import Config2
@@ -35,11 +36,13 @@ class NcgModel:
         else:
             raise KeyError
 
+        # TODO: self.model = self.config.MODEL
+
         print(f"{self.model}\n")
 
     def _dataloader(self, dataset):
-        if self.config.SAMPLING_STRAT == "oversampling":
-            if self.config.PIPELINE == "classification":
+        if self.config.SAMPLING is Sampling.OVERSAMPLING:
+            if self.config.PIPELINE is Pipeline.CLASSIFICATION:
                 _, labels = zip(*dataset)
 
                 # labels are in int format
@@ -60,7 +63,7 @@ class NcgModel:
                     collate_fn=self.model.collate,
                 )
 
-        else:
+        if self.config.SAMPLING is Sampling.SHUFFLE:
             # default sampling method: shuffling of data
             return DataLoader(
                 dataset,
@@ -73,9 +76,10 @@ class NcgModel:
         return nn.CrossEntropyLoss()
 
     def _optimizer(self):
-        if self.config.OPTIMIZER == "adam":
+        if self.config.OPTIMIZER is Optimizer.ADAM:
             return optim.Adam(self.model.parameters(), lr=self.config.LEARNING_RATE)
-        else:
+
+        if self.config.OPTIMIZER is Optimizer.SGD:
             return optim.SGD(
                 self.model.parameters(),
                 lr=self.config.LEARNING_RATE,

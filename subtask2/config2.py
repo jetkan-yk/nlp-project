@@ -1,13 +1,14 @@
 """
-Contains hyperparameters for subtask 2.
+Overrides default hyperparameters for subtask 2.
 """
+import sys
+
+sys.path.append("../")
+
+from config import Config
 
 
-class Config2:
-    BATCH_SIZE = 32
-    EPOCHS = 10
-    LEARNING_RATE = 0.1
-    MOMENTUM = 0.9
-    OPTIMIZER = "sgd"
-    PIPELINE = "default"  # problem formulation determines data processing eg. "classification", "extractive summarization"
-    SAMPLING_STRAT = "default"
+class Config2(Config):
+    """
+    Hyperparameters for subtask 2
+    """
