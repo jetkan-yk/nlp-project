@@ -57,14 +57,14 @@ def load_data(data_dir):
     return names, articles, sents, phrases
 
 
-def parse_sent(sent_str_list: list[str]):
+def parse_sent(sent_str_list):
     """
     Parses a list of `string` contributing sentence ids to a list of `int`, 0-indexed
     """
     return sorted(map(lambda sent_str: int(sent_str) - 1, sent_str_list))
 
 
-def parse_phrase(phrase_str_list: list[str]):
+def parse_phrase(phrase_str_list):
     """
     Parses a list of `string` phrase list into a `dict` that maps the contributing sentence id
     to a list of `string` phrase
