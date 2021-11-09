@@ -7,10 +7,9 @@ import argparse
 import torch
 from torch.utils.data.dataset import random_split
 
+from config import NcgConfig
 from data import NcgDataset
 from model import NcgModel
-
-TRAIN_RATIO = 0.8
 
 
 def main(args):
@@ -30,7 +29,7 @@ def train_test_split(dataset):
     """
     Returns 2 randomly split training and testing dataset
     """
-    train_size = int(len(dataset) * TRAIN_RATIO)
+    train_size = int(len(dataset) * NcgConfig.TRAIN_RATIO)
     test_size = len(dataset) - train_size
 
     return random_split(dataset, [train_size, test_size])

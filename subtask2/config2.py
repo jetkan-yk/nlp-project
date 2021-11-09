@@ -1,13 +1,18 @@
 """
-Contains hyperparameters for subtask 2.
+Overrides default hyperparameters for subtask 2.
 """
+import sys
+
+from subtask2.model2 import Model2
+
+sys.path.append("../")
+
+from config import NcgConfig
 
 
-class Config2:
-    PIPELINE = "default"  # problem formulation determines data processing eg. "classification", "extractive summarization"
-    BATCH_SIZE = 20
-    LEARNING_RATE = 0.3
-    MOMENTUM = 0.8
-    EPOCHS = 10
-    OPTIMIZER = "sgd"
-    SAMPLING_STRAT = "default"
+class Config2(NcgConfig):
+    """
+    Hyperparameters for subtask 2
+    """
+
+    MODEL = Model2

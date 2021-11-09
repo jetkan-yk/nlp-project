@@ -30,24 +30,24 @@ def load_data(data_dir):
         if dirnames != ["info-units", "triples"]:
             continue
 
-        # Currently located in task folder
+        # currently located in task folder
         names.append(dirpath)
 
         for filename in filenames:
-            # Load article
+            # load article
             if filename.endswith("-Stanza-out.txt"):
                 with open(os.path.join(dirpath, filename)) as f:
                     article = f.read().splitlines()
                     articles.append(article)
 
-            # Load contributing sentence id
+            # load contributing sentence id
             if filename == "sentences.txt":
                 with open(os.path.join(dirpath, filename)) as f:
                     sent_str_list = f.read().splitlines()
                     sent = parse_sent(sent_str_list)
                     sents.append(sent)
 
-            # Load phrase
+            # load phrase
             if filename == "entities.txt":
                 with open(os.path.join(dirpath, filename)) as f:
                     phrase_str_list = f.read().splitlines()

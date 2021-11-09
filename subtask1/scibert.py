@@ -1,32 +1,25 @@
 """
-Implements the `Model1` class and other subtask 1 helper functions
+Implements the `SciBert` model for subtask 1
 """
 import torch
 from torch import nn
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from transformers.data.data_collator import DataCollatorWithPadding
 
-device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-
-class Model1(nn.Module):
-    """
-    A `PyTorch nn.Module` subclass for subtask 1.
-    """
-
+class SciBert(nn.Module):
     def __init__(self):
         super().__init__()
-        # Replace pretraining head of the BERT model with a classification head which is randomly initialized
+        # replace pretraining head of the BERT model with a classification head which is randomly initialized
         self.model = AutoModelForSequenceClassification.from_pretrained(
             "allenai/scibert_scivocab_uncased", num_labels=2
         )
         self.collator = collator()
 
-    def forward(self, x):
+    def forward(self, batch):
         # takes in batch data and passes it through model
-        batch = x
-        input_ids = batch["input_ids"].to(device)
-        attention_mask = batch["attention_mask"].to(device)
+        input_ids = batch["input_ids"]
+        attention_mask = batch["attention_mask"]
         outputs = self.model(input_ids, attention_mask=attention_mask)
         return outputs.logits
 
@@ -37,7 +30,7 @@ class Model1(nn.Module):
         """
         Maps predicted batch outputs to labels
         """
-        predictions = torch.argmax(outputs, dim=-1)
+        predictions = torch.argmax(outputs, dim=1)
         return predictions
 
 
