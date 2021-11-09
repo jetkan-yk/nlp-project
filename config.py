@@ -32,3 +32,4 @@ class Config:
     OPTIMIZER = Optimizer.SGD
     PIPELINE = Pipeline.DEFAULT
     SAMPLING = Sampling.SHUFFLE
+    TRAIN_RATIO = 0.8
