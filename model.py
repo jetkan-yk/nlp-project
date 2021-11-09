@@ -3,7 +3,7 @@ Loads, saves model and implements the `NcgModel` class
 """
 
 import os
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime
 
 import numpy as np
@@ -38,59 +38,24 @@ class NcgModel:
 
         print(f"{self.model}\n")
 
-    def _dataloader(self, data):
+    def _dataloader(self, dataset):
         if self.config.SAMPLING_STRAT == "oversampling":
             if self.config.PIPELINE == "classification":
-                # oversampling with replacement, used to correct class imbalance for classification
-                # data is of format (feature, int_label)
-                assert (
-                    len(data[0]) == 2
-                    and type(data[0][0]) == str
-                    and type(data[0][1]) == int
-                )
+                _, labels = zip(*dataset)
 
-                features, labels = zip(*data)
-                labels = list(labels)
-                classes = np.unique(labels)
+                # labels are in int format
+                assert all(isinstance(x, int) for x in labels)
 
-                # gets distribution of class labels
-                count_dict = defaultdict(lambda: 0, dict())
-                for label in labels:
-                    count_dict[label] += 1
-
-                # gets class weights for sampling by taking reciprocal of class counts
-                class_count = [count_dict[i] for i in classes]
-                class_weights = (
-                    1.0 / torch.tensor(class_count, dtype=torch.float)
-                ).tolist()
+                class_count = list(Counter(labels).values())
+                # get class weights for sampling by taking reciprocal of class counts
+                class_weights = 1.0 / torch.tensor(class_count)
 
                 # list of weights denoting probability of sample of corresponding indice being sampled
                 sample_weights = [class_weights[i] for i in labels]
-                sampler = WeightedRandomSampler(
-                    weights=sample_weights,
-                    num_samples=len(sample_weights),
-                    replacement=True,
-                )
-
-                if False:
-                    # checks if sampling was correctly performed
-                    loader = DataLoader(
-                        data,
-                        batch_size=len(data),
-                        sampler=sampler,
-                    )
-
-                    sampled_labels = next(iter(loader))[1].tolist()
-                    sampled_count_dict = defaultdict(lambda: 0, {})
-
-                    for label in sampled_labels:
-                        sampled_count_dict[label] += 1
-
-                    print(sampled_count_dict)
-                    exit()
+                sampler = WeightedRandomSampler(sample_weights, len(sample_weights))
 
                 return DataLoader(
-                    data,
+                    dataset,
                     batch_size=self.config.BATCH_SIZE,
                     sampler=sampler,
                     collate_fn=self.model.collate,
@@ -99,7 +64,7 @@ class NcgModel:
         else:
             # default sampling method: shuffling of data
             return DataLoader(
-                data,
+                dataset,
                 batch_size=self.config.BATCH_SIZE,
                 shuffle=True,
                 collate_fn=self.model.collate,
@@ -110,10 +75,12 @@ class NcgModel:
 
     def _optimizer(self):
         if self.config.OPTIMIZER == "adam":
-            return optim.Adam(self.model.parameters(), self.config.LEARNING_RATE)
+            return optim.Adam(self.model.parameters(), lr=self.config.LEARNING_RATE)
         else:
             return optim.SGD(
-                self.model.parameters(), self.config.LEARNING_RATE, self.config.MOMENTUM
+                self.model.parameters(),
+                lr=self.config.LEARNING_RATE,
+                momentum=self.config.MOMENTUM,
             )
 
     def train(self, train_data, model_name):
