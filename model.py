@@ -178,6 +178,7 @@ def evaluate(preds, labels):
     Evaluates the predicted results against the expected labels and
     returns a f1-score for the result batch
     """
+    # TODO: implement evaluate function for non binary-class problems
     tp = fp = fn = tn = 0
 
     for pred, label in zip(preds, labels):
