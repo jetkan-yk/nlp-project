@@ -3,10 +3,9 @@ Loads, saves model and implements the `NcgModel` class
 """
 
 import os
-from collections import Counter, defaultdict
+from collections import Counter
 from datetime import datetime
 
-import numpy as np
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, WeightedRandomSampler
