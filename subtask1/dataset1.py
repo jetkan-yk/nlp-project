@@ -1,6 +1,5 @@
-from torch.utils.data import Dataset
-
 from config import Pipeline
+from torch.utils.data import Dataset
 
 from .config1 import Config1
 

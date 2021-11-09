@@ -1,13 +1,10 @@
 """
 Overrides default hyperparameters for subtask 1.
 """
-import sys
-
-from subtask1.scibert import SciBert
-
-sys.path.append("../")
 
 from config import NcgConfig, Optimizer, Pipeline, Sampling
+
+from subtask1.scibert import SciBert
 
 
 class Config1(NcgConfig):
