@@ -12,9 +12,7 @@ from torch.utils.data import DataLoader, WeightedRandomSampler
 
 from config import Optimizer, Pipeline, Sampling
 from subtask1.config1 import Config1
-from subtask1.model1 import Model1
 from subtask2.config2 import Config2
-from subtask2.model2 import Model2
 
 
 class NcgModel:
@@ -29,14 +27,12 @@ class NcgModel:
         # determines hyperparameters, model for each subtask
         if self.subtask == 1:
             self.config = Config1
-            self.model = Model1().to(self.device)
         elif self.subtask == 2:
             self.config = Config2
-            self.model = Model2().to(self.device)
         else:
             raise KeyError
 
-        # TODO: self.model = self.config.MODEL
+        self.model = self.config.MODEL().to(self.device)
 
         print(f"{self.model}\n")
 

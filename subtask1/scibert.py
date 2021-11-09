@@ -1,5 +1,5 @@
 """
-Implements the `Model1` class and other subtask 1 helper functions
+Implements the `SciBert` model for subtask 1
 """
 import torch
 from torch import nn
@@ -7,11 +7,7 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from transformers.data.data_collator import DataCollatorWithPadding
 
 
-class Model1(nn.Module):
-    """
-    A `PyTorch nn.Module` subclass for subtask 1.
-    """
-
+class SciBert(nn.Module):
     def __init__(self):
         super().__init__()
         # replace pretraining head of the BERT model with a classification head which is randomly initialized
