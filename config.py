@@ -19,7 +19,7 @@ class Optimizer(Enum):
     SGD = auto()
 
 
-class Config:
+class NcgConfig:
     """
     Default hyperparameter configs
     """

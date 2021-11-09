@@ -7,10 +7,10 @@ from subtask1.scibert import SciBert
 
 sys.path.append("../")
 
-from config import Config, Optimizer, Pipeline, Sampling
+from config import NcgConfig, Optimizer, Pipeline, Sampling
 
 
-class Config1(Config):
+class Config1(NcgConfig):
     """
     Hyperparameters for subtask 1
     """
