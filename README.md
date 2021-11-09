@@ -63,6 +63,7 @@ These optional flags can be combined into one single command line:
 - `main.py` - main runner file of the project
 - `data.py` - loads, pre-processes data and implements the `NcgDataset` class
 - `model.py` - loads, saves model and implements the `NcgModel` class
+- `config.py` - default hyperparameter `config` class, extended by subtask's `config` classes
 - `subtask1/` - implements the `Model1` class and other subtask 1 helper functions
 - `subtask2/` - implements the `Model2` class and other subtask 2 helper functions
 - `documentation/` - written reports
