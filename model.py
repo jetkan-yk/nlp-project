@@ -21,6 +21,7 @@ import sklearn.metrics as metrics
 import pandas as pd
 import pickle
 
+
 class NcgModel:
     """
     A model class that is powered by a `PyTorch nn.Module` subclass.
@@ -101,29 +102,28 @@ class NcgModel:
         # training of naive bayes classifier
         if self.config.MODEL == Model.NAIVEBAYES:
             # get [features], [labels]
-            loader = DataLoader(
-                        train_data,
-                        batch_size=len(train_data)
-                    )
+            loader = DataLoader(train_data, batch_size=len(train_data))
 
             train_x, train_y = next(iter(loader))
-            
+
             # encode features with tf-idf
             tfidf_vect = TfidfVectorizer(max_features=5000)
             tfidf_vect.fit(train_x)
-            
+
             train_x = tfidf_vect.transform(train_x)
 
             # train classifier
             classifier = MultinomialNB().fit(train_x, train_y)
-                        
+
             # save classifier
             model_path = os.path.join(f"subtask{self.subtask}", model_name)
-            with open(model_path, 'wb') as outfile:
-                pickle.dump({"vectorizer": tfidf_vect, "classifier": classifier}, outfile)
+            with open(model_path, "wb") as outfile:
+                pickle.dump(
+                    {"vectorizer": tfidf_vect, "classifier": classifier}, outfile
+                )
                 outfile.close()
             return
-        
+
         # training of neural models
         data_loader = self._dataloader(train_data)
         criterion = self._criterion()
@@ -179,42 +179,39 @@ class NcgModel:
         if self.config.MODEL == Model.NAIVEBAYES:
             # load checkpoint
             model_path = os.path.join(f"subtask{self.subtask}", model_name)
-            f = open(model_path, 'rb')
+            f = open(model_path, "rb")
             checkpoint = pickle.load(f)
-            tfidf_vect = checkpoint['vectorizer']
-            classifier = checkpoint['classifier']
-            
+            tfidf_vect = checkpoint["vectorizer"]
+            classifier = checkpoint["classifier"]
+
             # get [features], [labels]
-            loader = DataLoader(
-                        test_data,
-                        batch_size=len(test_data)
-                    )
+            loader = DataLoader(test_data, batch_size=len(test_data))
 
             test_x, test_y = next(iter(loader))
-            
+
             # encode features with tf-idf
             test_x = tfidf_vect.transform(test_x)
-            
+
             print(f"Begin testing...")
             # predict labels
             y_score = classifier.predict(test_x)
             preds = y_score
             labels = test_y
-            
+
             # calculate f1 score
             score = metrics.f1_score(labels, preds)
-            print(f"Accuracy: {score:.{3}}\n")
-            
-            # calculate accuracy
-#             n_right = 0
-#             for i in range(len(y_score)):
-#                 if y_score[i] == test_y[i]:
-#                     n_right += 1
+            print(f"F1 score: {score:.{3}}\n")
 
-#             print("Accuracy: %.2f%%" % ((n_right/float(len(test_y)) * 100)))
-            
+            # calculate accuracy
+            #             n_right = 0
+            #             for i in range(len(y_score)):
+            #                 if y_score[i] == test_y[i]:
+            #                     n_right += 1
+
+            #             print("Accuracy: %.2f%%" % ((n_right/float(len(test_y)) * 100)))
+
             return
-        
+
         # testing of neural models
         self.model = load_model(self.subtask, self.model, model_name)
         # Use default samping method
@@ -235,7 +232,7 @@ class NcgModel:
                 tp, fp, _, fn = self.model.evaluate(preds, labels)
                 batch_score += f1_score(tp, fp, fn)
 
-        print(f"Accuracy: {batch_score / len(data_loader):.{3}}\n")
+        print(f"F1 score: {batch_score / len(data_loader):.{3}}\n")
 
 
 def save_model(subtask, model: nn.Module, model_name):
