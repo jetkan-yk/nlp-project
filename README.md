@@ -133,9 +133,11 @@ NCG Task [Paper](https://arxiv.org/pdf/2106.07385.pdf) [GitHub](https://github.c
    > `ssh your_soc_id@sunfire.comp.nus.edu.sg`
 2. SSH to any of the `xgpg0` to `xgpg2` nodes
    > `ssh xgpg0`
+3. Git clone this repo into your SoC cluster nodes
+   > `git clone https://github.com/jetkan-yk/nlp-project.git`
 
 You can use SCP to transfer files from your local computer via \
- `scp -r nlp-project your_soc_id@sunfire.comp.nus.edu.sg:~/`
+ `scp -r your_local_folder/ your_soc_id@sunfire.comp.nus.edu.sg:~/`
 
 ## Project Requirement
 
