@@ -144,6 +144,7 @@ class NcgModel:
         data_loader = self._dataloader(test_data)
         batch_score = 0.0
 
+        print(f"Begin testing...")
         self.model.eval()
         with torch.no_grad():
             for data in data_loader:
