@@ -1,6 +1,5 @@
 __pycache__
 model*
-summary*
 environment.yml
 .ipynb_checkpoints/
 wandb/
