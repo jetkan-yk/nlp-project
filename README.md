@@ -30,11 +30,13 @@ Additionally, install other dependencies in `requirements.txt` using `conda` or 
 
 1. Make sure you have installed all the dependencies mentioned above
 2. Clone or download this repository, then open a terminal and navigate to this folder
-3. Train, test & evaluate the model by running `python3 main.py {1 | 2}` which performs these actions on `subtask 1 or 2`:
-   1. Load all data from the `data/` folder
-   2. Randomly split the dataset into training & testing set
-   3. Train the model using the training set and store the model in the `model` file
-   4. Test the model against the testing set
+3. Train, test & evaluate the model by running `python3 main.py {config}` which:
+   1. Select the `config`-th configurations from `config.py`. Use `python3 main.py -h`
+      to see all available configurations.
+   2. Load all data from the `data/` folder
+   3. Randomly split the dataset into training & testing set
+   4. Train the model using the training set and store the model in the `model` file
+   5. Test the model against the testing set
 
 ### Useful flags
 
@@ -61,11 +63,11 @@ These optional flags can be combined into one single command line:
 
 2. Implement the subtask's dataset & model in the `subtask/` folder
 
-3. Configure the subtask's config in the `subtask/` folder
+3. Configure the `config.py` details
 
-4. Request for wandb auth key from admin to enable summary mode
+4. Request for `wandb auth key` from admin to enable summary mode
 
-### Using the SOC Cluster Nodes
+### Using the SoC Cluster Nodes
 
 1. Connect to the SoC network via NUS WiFi, SoC VPN or Sunfire
    > `ssh your_soc_id@sunfire.comp.nus.edu.sg`
@@ -87,9 +89,9 @@ Besides, you can use SCP to transfer files from your local computer via
 - `main.py` - main runner file of the project
 - `data.py` - loads, pre-processes data and implements the `NcgDataset` class
 - `model.py` - loads, saves model and implements the `NcgModel` class
-- `config.py` - default hyperparameter `config` class, extended by subtask's `config` classes
-- `subtask1/` - implements the `Model1` class and other subtask 1 helper functions
-- `subtask2/` - implements the `Model2` class and other subtask 2 helper functions
+- `config.py` - defines all hyperparameters
+- `subtask1/` - implements the dataset, models and helper functions for subtask 1
+- `subtask2/` - implements the dataset, models and helper functions for subtask 2
 - `documentation/` - written reports
 
 ### Data
