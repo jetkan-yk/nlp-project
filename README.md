@@ -54,6 +54,27 @@ These optional flags can be combined into one single command line:
 
 `python3 main.py 2 --train`
 
+### Development
+
+1. Checkout to the develoment branch for the first time using `git checkout -t origin/subtask1`
+
+2. Implement the subtask's dataset & model in the `subtask/` folder
+
+3. Configure the subtask's config in the `subtask/` folder
+
+### Using the SOC Cluster Nodes
+
+1. Connect to the SoC network via NUS WiFi, SoC VPN or Sunfire
+   > `ssh your_soc_id@sunfire.comp.nus.edu.sg`
+2. SSH to any of the `xgpg0` to `xgpg2` nodes
+   > `ssh xgpg0`
+3. Git clone this repo into your SoC cluster nodes
+   > `git clone https://github.com/jetkan-yk/nlp-project.git`
+
+Besides, you can use SCP to transfer files from your local computer via
+
+> `scp -r your_local_folder/ your_soc_id@sunfire.comp.nus.edu.sg:~/`
+
 ## Project Structure
 
 ### General
@@ -126,18 +147,6 @@ NCG Task [Paper](https://arxiv.org/pdf/2106.07385.pdf) [GitHub](https://github.c
 6. Duluth [Paper](https://aclanthology.org/2021.semeval-1.60.pdf) [GitHub](https://github.com/anmartin94/DuluthSemEval2021Task11)
 
 7. YNU-HPCC [Paper](https://aclanthology.org/2021.semeval-1.58.pdf) [GitHub](https://github.com/maxinge8698/SemEval2021-Task11)
-
-### Using the SOC Cluster Nodes
-
-1. Connect to the SoC network via NUS WiFi, SoC VPN or Sunfire
-   > `ssh your_soc_id@sunfire.comp.nus.edu.sg`
-2. SSH to any of the `xgpg0` to `xgpg2` nodes
-   > `ssh xgpg0`
-3. Git clone this repo into your SoC cluster nodes
-   > `git clone https://github.com/jetkan-yk/nlp-project.git`
-
-You can use SCP to transfer files from your local computer via \
- `scp -r your_local_folder/ your_soc_id@sunfire.comp.nus.edu.sg:~/`
 
 ## Project Requirement
 
