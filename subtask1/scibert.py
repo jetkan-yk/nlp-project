@@ -30,8 +30,26 @@ class SciBert(nn.Module):
         """
         Maps predicted batch outputs to labels
         """
-        predictions = torch.argmax(outputs, dim=1)
-        return predictions
+        return torch.argmax(outputs, dim=1)
+
+    def evaluate(self, preds, labels):
+        """
+        Evaluates the predicted results against the expected labels and
+        returns the tp, fp, tn, fn values for the result batch
+        """
+        tp = fp = tn = fn = 0
+
+        for pred, label in zip(preds, labels):
+            if pred == 1 and label == 1:
+                tp += 1
+            if pred == 1 and label == 0:
+                fp += 1
+            if pred == 0 and label == 1:
+                fn += 1
+            if pred == 0 and label == 0:
+                tn += 1
+
+        return tp, fp, tn, fn
 
 
 class collator:

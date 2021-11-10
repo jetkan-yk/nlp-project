@@ -103,7 +103,7 @@ class NcgDataset(Dataset):
         elif self.subtask == 2:
             self.dataset = Dataset2(names, articles, sents, phrases)
         else:
-            raise KeyError
+            raise KeyError(f"Invalid subtask number: {self.subtask}")
 
     def __len__(self):
         """
