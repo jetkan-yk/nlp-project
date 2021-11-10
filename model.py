@@ -121,12 +121,14 @@ class NcgModel:
                 # calculate running loss value
                 running_loss += loss.item()
 
+                # log loss
+                wandb.log({"loss": loss})
+
                 # print loss value every 100 steps and reset the running loss
                 if step % 100 == 99:
                     print(
                         f"[{epoch + 1}, {step + 1:{4}}] loss: {running_loss / 100:.{3}}"
                     )
-                    wandb.log({"loss": loss})
                     running_loss = 0.0
         end = datetime.now()
         print(f"\nTraining finished in {(end - start).seconds / 60.0} minutes.\n")
