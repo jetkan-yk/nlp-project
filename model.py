@@ -136,6 +136,8 @@ class NcgModel:
         Tests the `model_name` model in the subtask folder using `test_data`
         """
         self.model = load_model(self.subtask, self.model, model_name)
+        # Use default samping method
+        self.config.SAMPLING = Sampling.SHUFFLE
 
         data_loader = self._dataloader(test_data)
         batch_score = 0.0
