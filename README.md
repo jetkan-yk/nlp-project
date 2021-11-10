@@ -65,7 +65,7 @@ These optional flags can be combined into one single command line:
 
 3. Configure the `config.py` details
 
-4. Request for `wandb auth key` from admin to enable summary mode
+4. Login and visit [here](https://wandb.ai/authorize) to retrieve your `wandb` API key for summary mode
 
 ### Using the SoC Cluster Nodes
 
