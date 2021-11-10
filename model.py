@@ -3,23 +3,19 @@ Loads, saves model and implements the `NcgModel` class
 """
 
 import os
+import pickle
 from collections import Counter
 from datetime import datetime
 
+import sklearn.metrics as metrics
 import torch
+import wandb
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
 from torch import nn, optim
 from torch.utils.data import DataLoader, WeightedRandomSampler
 
-import wandb
-from config import Optimizer, Pipeline, Sampling, Model
-from subtask1.config1 import Config1
-from subtask2.config2 import Config2
-
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.feature_extraction.text import TfidfVectorizer
-import sklearn.metrics as metrics
-import pandas as pd
-import pickle
+from config import Model, Optimizer, Pipeline, Sampling
 
 
 class NcgModel:
@@ -27,27 +23,25 @@ class NcgModel:
     A model class that is powered by a `PyTorch nn.Module` subclass.
     """
 
-    def __init__(self, subtask, device):
-        self.subtask = subtask
-        self.device = device
+    def __init__(self, config):
+        self.subtask = config["SUBTASK"]
+        self.device = config["DEVICE"]
+        self.model_type = config["MODEL"]
+        self.model = config["MODEL"].value().to(self.device)
+        self.batch_size = config["BATCH_SIZE"]
+        self.epochs = config["EPOCHS"]
+        self.lr = config["LEARNING_RATE"]
+        self.momentum = config["MOMENTUM"]
+        self.optimizer = config["OPTIMIZER"]
+        self.pipeline = config["PIPELINE"]
+        self.sampling = config["SAMPLING"]
+        self.summary_mode = config["SUMMARY_MODE"]
 
-        if self.subtask == 1:
-            self.config = Config1
-        elif self.subtask == 2:
-            self.config = Config2
-        else:
-            raise KeyError(f"Invalid subtask number: {self.subtask}")
-
-        if self.config.MODEL == Model.NAIVEBAYES:
-            self.model = MultinomialNB()
-        else:
-            self.model = self.config.MODEL().to(self.device)
-
-        print(f"Using model: {self.model.__class__.__name__}\n")
+        print(f"Using model: {self.model_type.name}\n")
 
     def _dataloader(self, dataset):
-        if self.config.SAMPLING is Sampling.OVERSAMPLING:
-            if self.config.PIPELINE is not Pipeline.CLASSIFICATION:
+        if self.sampling is Sampling.OVERSAMPLING:
+            if self.pipeline is not Pipeline.CLASSIFICATION:
                 raise TypeError("Cannot oversampling non-classification problem")
 
             _, labels = zip(*dataset)
@@ -61,15 +55,15 @@ class NcgModel:
 
             return DataLoader(
                 dataset,
-                batch_size=self.config.BATCH_SIZE,
+                batch_size=self.batch_size,
                 sampler=sampler,
                 collate_fn=self.model.collate,
             )
 
-        elif self.config.SAMPLING is Sampling.SHUFFLE:
+        elif self.sampling is Sampling.SHUFFLE:
             return DataLoader(
                 dataset,
-                batch_size=self.config.BATCH_SIZE,
+                batch_size=self.batch_size,
                 shuffle=True,
                 collate_fn=self.model.collate,
             )
@@ -81,15 +75,17 @@ class NcgModel:
         return nn.CrossEntropyLoss()
 
     def _optimizer(self):
-        if self.config.OPTIMIZER is Optimizer.ADAMW:
-            return optim.AdamW(self.model.parameters(), lr=self.config.LEARNING_RATE)
-        elif self.config.OPTIMIZER is Optimizer.ADAM:
-            return optim.Adam(self.model.parameters(), lr=self.config.LEARNING_RATE)
-        elif self.config.OPTIMIZER is Optimizer.SGD:
+        if self.optimizer is Optimizer.ADAM:
+            return optim.Adam(self.model.parameters(), lr=self.lr)
+
+        elif self.optimizer is Optimizer.ADAMW:
+            return optim.AdamW(self.model.parameters(), lr=self.lr)
+
+        elif self.optimizer is Optimizer.SGD:
             return optim.SGD(
                 self.model.parameters(),
-                lr=self.config.LEARNING_RATE,
-                momentum=self.config.MOMENTUM,
+                lr=self.lr,
+                momentum=self.momentum,
             )
 
         else:
@@ -100,7 +96,7 @@ class NcgModel:
         Trains the model using `train_data` and saves the model in `model_name`
         """
         # training of naive bayes classifier
-        if self.config.MODEL == Model.NAIVEBAYES:
+        if self.model_type is Model.NAIVE_BAYES:
             # get [features], [labels]
             loader = DataLoader(train_data, batch_size=len(train_data))
 
@@ -131,7 +127,7 @@ class NcgModel:
 
         print(f"Begin training...")
         start = datetime.now()
-        for epoch in range(self.config.EPOCHS):
+        for epoch in range(self.epochs):
             self.model.train()
             running_loss = 0.0
 
@@ -158,7 +154,8 @@ class NcgModel:
                 running_loss += loss.item()
 
                 # log loss
-                wandb.log({"loss": loss})
+                if self.summary_mode:
+                    wandb.log({"loss": loss})
 
                 # print loss value every 100 steps and reset the running loss
                 if step % 100 == 99:
@@ -176,7 +173,7 @@ class NcgModel:
         Tests the `model_name` model in the subtask folder using `test_data`
         """
         # testing of naive bayes classifier
-        if self.config.MODEL == Model.NAIVEBAYES:
+        if self.model_type is Model.NAIVE_BAYES:
             # load checkpoint
             model_path = os.path.join(f"subtask{self.subtask}", model_name)
             f = open(model_path, "rb")
@@ -215,7 +212,7 @@ class NcgModel:
         # testing of neural models
         self.model = load_model(self.subtask, self.model, model_name)
         # Use default samping method
-        self.config.SAMPLING = Sampling.SHUFFLE
+        self.sampling = Sampling.SHUFFLE
 
         data_loader = self._dataloader(test_data)
         batch_score = 0.0

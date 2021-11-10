@@ -24,7 +24,7 @@ class Optimizer(Enum):
 
 
 class Model(Enum):
-    NAIVEBAYES = MultinomialNB
+    NAIVE_BAYES = MultinomialNB
     SCIBERT = SciBert
 
 
@@ -52,7 +52,7 @@ SBERT_ADAM_OSMP_1 = DEFAULT | dict(
 )
 
 NB_ADAMW_OSMP_1 = SBERT_ADAM_OSMP_1 | dict(
-    MODEL=Model.NAIVEBAYES, OPTIMIZER=Optimizer.ADAMW
+    MODEL=Model.NAIVE_BAYES, OPTIMIZER=Optimizer.ADAMW
 )
 
 NcgConfigs = [DEFAULT, SBERT_ADAM_OSMP_1, NB_ADAMW_OSMP_1]

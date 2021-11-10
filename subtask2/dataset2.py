@@ -10,7 +10,7 @@ class Dataset2(Dataset):
         y = a list of phrases (a list of `string`)
     """
 
-    def __init__(self, names, articles, sents, phrases):
+    def __init__(self, names, articles, sents, phrases, config):
         """
         Initializes the dataset for subtask 2
         """
