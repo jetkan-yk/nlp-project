@@ -24,13 +24,12 @@ class NcgModel:
         self.subtask = subtask
         self.device = device
 
-        # determines hyperparameters, model for each subtask
         if self.subtask == 1:
             self.config = Config1
         elif self.subtask == 2:
             self.config = Config2
         else:
-            raise KeyError
+            raise KeyError(f"Invalid subtask number: {self.subtask}")
 
         self.model = self.config.MODEL().to(self.device)
 
@@ -38,35 +37,35 @@ class NcgModel:
 
     def _dataloader(self, dataset):
         if self.config.SAMPLING is Sampling.OVERSAMPLING:
-            if self.config.PIPELINE is Pipeline.CLASSIFICATION:
-                _, labels = zip(*dataset)
+            if self.config.PIPELINE is not Pipeline.CLASSIFICATION:
+                raise TypeError("Cannot oversampling non-classification problem")
 
-                # labels are in int format
-                assert all(isinstance(x, int) for x in labels)
+            _, labels = zip(*dataset)
 
-                class_count = list(Counter(labels).values())
-                # get class weights for sampling by taking reciprocal of class counts
-                class_weights = 1.0 / torch.tensor(class_count)
+            class_count = list(Counter(labels).values())
+            class_weights = 1.0 / torch.tensor(class_count)
 
-                # list of weights denoting probability of sample of corresponding indice being sampled
-                sample_weights = [class_weights[i] for i in labels]
-                sampler = WeightedRandomSampler(sample_weights, len(sample_weights))
+            # list of weights denoting probability of sample of corresponding indice being sampled
+            sample_weights = [class_weights[i] for i in labels]
+            sampler = WeightedRandomSampler(sample_weights, len(sample_weights))
 
-                return DataLoader(
-                    dataset,
-                    batch_size=self.config.BATCH_SIZE,
-                    sampler=sampler,
-                    collate_fn=self.model.collate,
-                )
+            return DataLoader(
+                dataset,
+                batch_size=self.config.BATCH_SIZE,
+                sampler=sampler,
+                collate_fn=self.model.collate,
+            )
 
-        if self.config.SAMPLING is Sampling.SHUFFLE:
-            # default sampling method: shuffling of data
+        elif self.config.SAMPLING is Sampling.SHUFFLE:
             return DataLoader(
                 dataset,
                 batch_size=self.config.BATCH_SIZE,
                 shuffle=True,
                 collate_fn=self.model.collate,
             )
+
+        else:
+            raise NotImplementedError
 
     def _criterion(self):
         return nn.CrossEntropyLoss()
@@ -75,12 +74,15 @@ class NcgModel:
         if self.config.OPTIMIZER is Optimizer.ADAM:
             return optim.Adam(self.model.parameters(), lr=self.config.LEARNING_RATE)
 
-        if self.config.OPTIMIZER is Optimizer.SGD:
+        elif self.config.OPTIMIZER is Optimizer.SGD:
             return optim.SGD(
                 self.model.parameters(),
                 lr=self.config.LEARNING_RATE,
                 momentum=self.config.MOMENTUM,
             )
+
+        else:
+            raise NotImplementedError
 
     def train(self, train_data, model_name):
         """
