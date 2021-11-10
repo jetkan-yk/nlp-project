@@ -90,6 +90,7 @@ class NcgModel:
         criterion = self._criterion()
         optimizer = self._optimizer()
 
+        print(f"Begin training...")
         start = datetime.now()
         for epoch in range(self.config.EPOCHS):
             self.model.train()
@@ -145,7 +146,8 @@ class NcgModel:
 
                 outputs = self.model(features)
                 preds = self.model.predict(outputs)
-                batch_score += evaluate(preds, labels)
+                tp, fp, _, fn = self.model.evaluate(preds, labels)
+                batch_score += f1_score(tp, fp, fn)
 
         print(f"Accuracy: {batch_score / len(data_loader):.{3}}\n")
 
@@ -171,27 +173,6 @@ def load_model(subtask, model: nn.Module, model_name):
     print(f"Loaded model from {model_path}\n")
 
     return model
-
-
-def evaluate(preds, labels):
-    """
-    Evaluates the predicted results against the expected labels and
-    returns a f1-score for the result batch
-    """
-    # TODO: implement evaluate function for non binary-class problems
-    tp = fp = fn = tn = 0
-
-    for pred, label in zip(preds, labels):
-        if pred == 1 and label == 1:
-            tp += 1
-        if pred == 1 and label == 0:
-            fp += 1
-        if pred == 0 and label == 1:
-            fn += 1
-        if pred == 0 and label == 0:
-            tn += 1
-
-    return f1_score(tp, fp, fn)
 
 
 def f1_score(tp, fp, fn):
