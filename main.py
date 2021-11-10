@@ -6,6 +6,9 @@ import argparse
 
 import torch
 import wandb
+
+wandb.init(project="ncg", entity="jetkan-yk")
+
 from torch.utils.data.dataset import random_split
 
 from config import NcgConfig
@@ -14,9 +17,6 @@ from model import NcgModel
 
 
 def main(args):
-    if args.s:
-        wandb.init(project="ncg", entity="jetkan-yk")
-
     dataset = NcgDataset(args.subtask, args.d)
     train_data, test_data = train_test_split(dataset)
 
@@ -50,7 +50,6 @@ def parse_args():
     parser.add_argument("subtask", choices=[1, 2], type=int, help="choose subtask")
     parser.add_argument("-d", default="data", type=str, help="specify data directory")
     parser.add_argument("-m", default="model", type=str, help="specify model name")
-    parser.add_argument("-s", action="store_true", help="enable summary mode")
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--train", action="store_true", help="train model only")
