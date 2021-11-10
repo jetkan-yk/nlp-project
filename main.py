@@ -32,7 +32,9 @@ def train_test_split(dataset):
     train_size = int(len(dataset) * NcgConfig.TRAIN_RATIO)
     test_size = len(dataset) - train_size
 
-    return random_split(dataset, [train_size, test_size])
+    return random_split(
+        dataset, [train_size, test_size], generator=torch.Generator().manual_seed(0)
+    )
 
 
 def parse_args():
