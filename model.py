@@ -72,9 +72,10 @@ class NcgModel:
         return nn.CrossEntropyLoss()
 
     def _optimizer(self):
-        if self.config.OPTIMIZER is Optimizer.ADAM:
+        if self.config.OPTIMIZER is Optimizer.ADAMW:
+            return optim.AdamW(self.model.parameters(), lr=self.config.LEARNING_RATE)
+        elif self.config.OPTIMIZER is Optimizer.ADAM:
             return optim.Adam(self.model.parameters(), lr=self.config.LEARNING_RATE)
-
         elif self.config.OPTIMIZER is Optimizer.SGD:
             return optim.SGD(
                 self.model.parameters(),

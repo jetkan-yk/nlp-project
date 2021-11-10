@@ -13,8 +13,8 @@ class Config1(NcgConfig):
     """
 
     EPOCHS = 2
-    LEARNING_RATE = 5e-5
+    LEARNING_RATE = 2e-5
     MODEL = SciBert
-    OPTIMIZER = Optimizer.ADAM
+    OPTIMIZER = Optimizer.ADAMW
     PIPELINE = Pipeline.CLASSIFICATION
     SAMPLING = Sampling.OVERSAMPLING

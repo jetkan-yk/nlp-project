@@ -16,6 +16,7 @@ class Sampling(Enum):
 
 class Optimizer(Enum):
     ADAM = auto()
+    ADAMW = auto()
     SGD = auto()
 
 
