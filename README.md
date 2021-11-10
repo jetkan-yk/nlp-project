@@ -63,6 +63,8 @@ These optional flags can be combined into one single command line:
 
 3. Configure the subtask's config in the `subtask/` folder
 
+4. Request for wandb auth key from admin to enable summary mode
+
 ### Using the SOC Cluster Nodes
 
 1. Connect to the SoC network via NUS WiFi, SoC VPN or Sunfire
