@@ -1,8 +1,6 @@
 from config import Pipeline
 from torch.utils.data import Dataset
 
-from .config1 import Config1
-
 
 class Dataset1(Dataset):
     """
@@ -13,7 +11,7 @@ class Dataset1(Dataset):
         y = a contributing sentence (a `string`)
     """
 
-    def __init__(self, names, articles, sents, phrases):
+    def __init__(self, names, articles, sents, phrases, config):
         """
         Initializes the dataset for subtask 1
         """
@@ -27,7 +25,7 @@ class Dataset1(Dataset):
 
         # formats data for classification task (sent, label),
         # where label == 1 for contributing sentences and label == 0 otherwise
-        if Config1.PIPELINE is Pipeline.CLASSIFICATION:
+        if config["PIPELINE"] is Pipeline.CLASSIFICATION:
             for idx, sent_list in enumerate(self.sents):
                 article = self._stringify(idx)
                 for sent_id, sent in enumerate(article):

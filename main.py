@@ -1,27 +1,32 @@
 """
-Usage: python3 main.py {1 | 2} [--train | --test] [--summary] [-d data_dir] [-m model_name] [-s summary_name]
+Usage: python3 main.py {config} [--train | --test] [--summary] [-d data_dir] [-m model_name] [-s summary_name]
 """
 
 import argparse
 
 import torch
+import wandb
 from torch.utils.data.dataset import random_split
 
-import wandb
-from config import NcgConfig
-from data import NcgDataset
+from config import NcgConfigs
+from dataset import NcgDataset
 from model import NcgModel
 
 
 def main(args):
+    config = NcgConfigs[args.c]
+    config["DEVICE"] = "cuda" if torch.cuda.is_available() else "cpu"
+
     if args.summary:
-        wandb.init(project="ncg", entity="jetkan-yk", name=args.s)
+        config["SUMMARY_MODE"] = True
+        wandb.init(project="ncg", entity="cs4248-g17", name=args.s, config=config)
+    else:
+        config["SUMMARY_MODE"] = False
 
-    dataset = NcgDataset(args.subtask, args.d)
-    train_data, test_data = train_test_split(dataset)
+    dataset = NcgDataset(config, args.d)
+    train_data, test_data = train_test_split(dataset, config["TRAIN_RATIO"])
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = NcgModel(args.subtask, device)
+    model = NcgModel(config)
 
     if args.train or args.train == args.test:
         model.train(train_data, args.m)
@@ -29,11 +34,11 @@ def main(args):
         model.test(test_data, args.m)
 
 
-def train_test_split(dataset):
+def train_test_split(dataset, train_ratio):
     """
     Returns 2 randomly split training and testing dataset
     """
-    train_size = int(len(dataset) * NcgConfig.TRAIN_RATIO)
+    train_size = int(len(dataset) * train_ratio)
     test_size = len(dataset) - train_size
 
     return random_split(
@@ -47,7 +52,9 @@ def parse_args():
     """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("subtask", choices=[1, 2], type=int, help="choose subtask")
+    parser.add_argument(
+        "c", choices=range(len(NcgConfigs)), type=int, help="select config"
+    )
 
     parser.add_argument("-d", default="data", type=str, help="specify data directory")
     parser.add_argument("-m", default="model", type=str, help="specify model name")

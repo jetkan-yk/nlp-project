@@ -92,18 +92,18 @@ class NcgDataset(Dataset):
         y = a list of phrases (a list of `string`)
     """
 
-    def __init__(self, subtask, data_dir):
-        self.subtask = subtask
+    def __init__(self, config, data_dir):
+        subtask = config["SUBTASK"]
         names, articles, sents, phrases = load_data(data_dir)
 
         print(f"Loaded data from {data_dir}\n")
 
-        if self.subtask == 1:
-            self.dataset = Dataset1(names, articles, sents, phrases)
-        elif self.subtask == 2:
-            self.dataset = Dataset2(names, articles, sents, phrases)
+        if subtask == 1:
+            self.dataset = Dataset1(names, articles, sents, phrases, config)
+        elif subtask == 2:
+            self.dataset = Dataset2(names, articles, sents, phrases, config)
         else:
-            raise KeyError(f"Invalid subtask number: {self.subtask}")
+            raise KeyError(f"Invalid subtask number: {subtask}")
 
     def __len__(self):
         """
