@@ -229,8 +229,15 @@ class NcgModel:
 
                 outputs = self.model(features)
                 preds = self.model.predict(outputs)
-                tp, fp, _, fn = self.model.evaluate(preds, labels)
+                tp, fp, tn, fn = self.model.evaluate(preds, labels)
                 batch_score += f1_score(tp, fp, fn)
+
+                if self.summary_mode:
+                    wandb.log({"batch_score": batch_score})
+                    wandb.log({"batch_tp": tp})
+                    wandb.log({"batch_fp": fp})
+                    wandb.log({"batch_tn": tn})
+                    wandb.log({"batch_tn": fn})
 
         print(f"F1 score: {batch_score / len(data_loader):.{3}}\n")
 
