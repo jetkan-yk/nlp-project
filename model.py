@@ -218,7 +218,7 @@ class NcgModel:
         self.sampling = Sampling.SHUFFLE
 
         data_loader = self._dataloader(test_data)
-        batch_score = 0.0
+        total_score = 0.0
 
         print(f"Begin testing...")
         self.model.eval()
@@ -229,17 +229,14 @@ class NcgModel:
 
                 outputs = self.model(features)
                 preds = self.model.predict(outputs)
-                tp, fp, tn, fn = self.model.evaluate(preds, labels)
-                batch_score += f1_score(tp, fp, fn)
+                tp, fp, _, fn = self.model.evaluate(preds, labels)
+                batch_score = f1_score(tp, fp, fn)
+                total_score += batch_score
 
                 if self.summary_mode:
                     wandb.log({"batch_score": batch_score})
-                    wandb.log({"batch_tp": tp})
-                    wandb.log({"batch_fp": fp})
-                    wandb.log({"batch_tn": tn})
-                    wandb.log({"batch_tn": fn})
 
-        print(f"F1 score: {batch_score / len(data_loader):.{3}}\n")
+        print(f"F1 score: {total_score / len(data_loader):.{3}}\n")
 
 
 def save_model(subtask, model: nn.Module, model_name):
