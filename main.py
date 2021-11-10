@@ -19,7 +19,7 @@ def main(args):
 
     if args.summary:
         config["SUMMARY_MODE"] = True
-        wandb.init(project="ncg", entity="jetkan-yk", name=args.s, config=config)
+        wandb.init(project="ncg", entity="cs4248-g17", name=args.s, config=config)
     else:
         config["SUMMARY_MODE"] = False
 
