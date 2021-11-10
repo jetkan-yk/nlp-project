@@ -27,7 +27,10 @@ class NcgModel:
         self.subtask = config["SUBTASK"]
         self.device = config["DEVICE"]
         self.model_type = config["MODEL"]
-        self.model = config["MODEL"].value().to(self.device)
+        try:
+            self.model = config["MODEL"].value().to(self.device)
+        except AttributeError:
+            self.model = config["MODEL"].value()
         self.batch_size = config["BATCH_SIZE"]
         self.epochs = config["EPOCHS"]
         self.lr = config["LEARNING_RATE"]
