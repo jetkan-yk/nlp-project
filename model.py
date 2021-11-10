@@ -11,10 +11,15 @@ from torch import nn, optim
 from torch.utils.data import DataLoader, WeightedRandomSampler
 
 import wandb
-from config import Optimizer, Pipeline, Sampling
+from config import Optimizer, Pipeline, Sampling, Model
 from subtask1.config1 import Config1
 from subtask2.config2 import Config2
 
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.feature_extraction.text import TfidfVectorizer
+import sklearn.metrics as metrics
+import pandas as pd
+import pickle
 
 class NcgModel:
     """
@@ -32,7 +37,10 @@ class NcgModel:
         else:
             raise KeyError(f"Invalid subtask number: {self.subtask}")
 
-        self.model = self.config.MODEL().to(self.device)
+        if self.config.MODEL == Model.NAIVEBAYES:
+            self.model = MultinomialNB()
+        else:
+            self.model = self.config.MODEL().to(self.device)
 
         print(f"Using model: {self.model.__class__.__name__}\n")
 
@@ -90,6 +98,33 @@ class NcgModel:
         """
         Trains the model using `train_data` and saves the model in `model_name`
         """
+        # training of naive bayes classifier
+        if self.config.MODEL == Model.NAIVEBAYES:
+            # get [features], [labels]
+            loader = DataLoader(
+                        train_data,
+                        batch_size=len(train_data)
+                    )
+
+            train_x, train_y = next(iter(loader))
+            
+            # encode features with tf-idf
+            tfidf_vect = TfidfVectorizer(max_features=5000)
+            tfidf_vect.fit(train_x)
+            
+            train_x = tfidf_vect.transform(train_x)
+
+            # train classifier
+            classifier = MultinomialNB().fit(train_x, train_y)
+                        
+            # save classifier
+            model_path = os.path.join(f"subtask{self.subtask}", model_name)
+            with open(model_path, 'wb') as outfile:
+                pickle.dump({"vectorizer": tfidf_vect, "classifier": classifier}, outfile)
+                outfile.close()
+            return
+        
+        # training of neural models
         data_loader = self._dataloader(train_data)
         criterion = self._criterion()
         optimizer = self._optimizer()
@@ -140,6 +175,47 @@ class NcgModel:
         """
         Tests the `model_name` model in the subtask folder using `test_data`
         """
+        # testing of naive bayes classifier
+        if self.config.MODEL == Model.NAIVEBAYES:
+            # load checkpoint
+            model_path = os.path.join(f"subtask{self.subtask}", model_name)
+            f = open(model_path, 'rb')
+            checkpoint = pickle.load(f)
+            tfidf_vect = checkpoint['vectorizer']
+            classifier = checkpoint['classifier']
+            
+            # get [features], [labels]
+            loader = DataLoader(
+                        test_data,
+                        batch_size=len(test_data)
+                    )
+
+            test_x, test_y = next(iter(loader))
+            
+            # encode features with tf-idf
+            test_x = tfidf_vect.transform(test_x)
+            
+            print(f"Begin testing...")
+            # predict labels
+            y_score = classifier.predict(test_x)
+            preds = y_score
+            labels = test_y
+            
+            # calculate f1 score
+            score = metrics.f1_score(labels, preds)
+            print(f"Accuracy: {score:.{3}}\n")
+            
+            # calculate accuracy
+#             n_right = 0
+#             for i in range(len(y_score)):
+#                 if y_score[i] == test_y[i]:
+#                     n_right += 1
+
+#             print("Accuracy: %.2f%%" % ((n_right/float(len(test_y)) * 100)))
+            
+            return
+        
+        # testing of neural models
         self.model = load_model(self.subtask, self.model, model_name)
         # Use default samping method
         self.config.SAMPLING = Sampling.SHUFFLE

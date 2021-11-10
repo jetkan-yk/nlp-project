@@ -18,7 +18,9 @@ class Optimizer(Enum):
     ADAM = auto()
     ADAMW = auto()
     SGD = auto()
-
+    
+class Model(Enum):
+    NAIVEBAYES = auto()
 
 class NcgConfig:
     """
