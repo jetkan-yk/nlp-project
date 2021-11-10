@@ -236,7 +236,10 @@ class NcgModel:
                 if self.summary_mode:
                     wandb.log({"batch_score": batch_score})
 
-        print(f"F1 score: {total_score / len(data_loader):.{3}}\n")
+        avg_score = total_score / len(data_loader)
+        if self.summary_mode:
+            wandb.log({"f1_score": avg_score})
+        print(f"F1 score: {avg_score:.{3}}\n")
 
 
 def save_model(subtask, model: nn.Module, model_name):
