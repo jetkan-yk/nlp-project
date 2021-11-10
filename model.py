@@ -9,8 +9,8 @@ from datetime import datetime
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, WeightedRandomSampler
-import wandb
 
+import wandb
 from config import Optimizer, Pipeline, Sampling
 from subtask1.config1 import Config1
 from subtask2.config2 import Config2
@@ -34,9 +34,7 @@ class NcgModel:
 
         self.model = self.config.MODEL().to(self.device)
 
-        wandb.watch(self.model)
-
-        print(f"{self.model}\n")
+        print(f"Using model: {self.model.__class__.__name__}\n")
 
     def _dataloader(self, dataset):
         if self.config.SAMPLING is Sampling.OVERSAMPLING:
@@ -128,6 +126,7 @@ class NcgModel:
                     print(
                         f"[{epoch + 1}, {step + 1:{4}}] loss: {running_loss / 100:.{3}}"
                     )
+                    wandb.log({"loss": loss})
                     running_loss = 0.0
         end = datetime.now()
         print(f"\nTraining finished in {(end - start).seconds / 60.0} minutes.\n")
