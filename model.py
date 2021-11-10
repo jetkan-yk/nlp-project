@@ -9,6 +9,7 @@ from datetime import datetime
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, WeightedRandomSampler
+import wandb
 
 from config import Optimizer, Pipeline, Sampling
 from subtask1.config1 import Config1
@@ -32,6 +33,8 @@ class NcgModel:
             raise KeyError(f"Invalid subtask number: {self.subtask}")
 
         self.model = self.config.MODEL().to(self.device)
+
+        wandb.watch(self.model)
 
         print(f"{self.model}\n")
 
