@@ -10,6 +10,7 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, WeightedRandomSampler
 
+import wandb
 from config import Optimizer, Pipeline, Sampling
 from subtask1.config1 import Config1
 from subtask2.config2 import Config2
@@ -33,7 +34,7 @@ class NcgModel:
 
         self.model = self.config.MODEL().to(self.device)
 
-        print(f"{self.model}\n")
+        print(f"Using model: {self.model.__class__.__name__}\n")
 
     def _dataloader(self, dataset):
         if self.config.SAMPLING is Sampling.OVERSAMPLING:
@@ -120,6 +121,9 @@ class NcgModel:
                 # calculate running loss value
                 running_loss += loss.item()
 
+                # log loss
+                wandb.log({"loss": loss})
+
                 # print loss value every 100 steps and reset the running loss
                 if step % 100 == 99:
                     print(
@@ -142,6 +146,7 @@ class NcgModel:
         data_loader = self._dataloader(test_data)
         batch_score = 0.0
 
+        print(f"Begin testing...")
         self.model.eval()
         with torch.no_grad():
             for data in data_loader:
