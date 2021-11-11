@@ -87,7 +87,7 @@ Besides, you can use SCP to transfer files from your local computer via
 ![architecture](documentation/architecture.png)
 
 - `main.py` - main runner file of the project
-- `data.py` - loads, pre-processes data and implements the `NcgDataset` class
+- `dataset.py` - loads, pre-processes data and implements the `NcgDataset` class
 - `model.py` - loads, saves model and implements the `NcgModel` class
 - `config.py` - defines all hyperparameters
 - `subtask1/` - implements the dataset, models and helper functions for subtask 1
