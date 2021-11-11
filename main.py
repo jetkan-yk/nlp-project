@@ -3,6 +3,7 @@ Usage: python3 main.py {config} [--train | --test] [--summary] [-d data_dir] [-m
 """
 
 import argparse
+import pprint as pp
 
 import torch
 import wandb
@@ -14,6 +15,10 @@ from model import NcgModel
 
 
 def main(args):
+    if args.c not in range(1, len(NcgConfigs)):
+        options = {id: config for id, config in enumerate(NcgConfigs) if id > 0}
+        raise ValueError(f"Please select config number from\n{pp.pformat(options)}")
+
     config = NcgConfigs[args.c]
     config["DEVICE"] = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -53,7 +58,11 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "c", choices=range(len(NcgConfigs)), type=int, help="select config"
+        "c",
+        choices=range(len(NcgConfigs)),
+        default=0,
+        type=int,
+        help="select config, choose 0 to show all configs",
     )
 
     parser.add_argument("-d", default="data", type=str, help="specify data directory")
