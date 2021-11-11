@@ -137,6 +137,8 @@ The data folders is organized as follows:
 
 NCG Task [Paper](https://arxiv.org/pdf/2106.07385.pdf) [GitHub](https://github.com/ncg-task?tab=repositories)
 
+[Evaluation script](https://github.com/ncg-task/scoring-program/blob/master/evaluation.py)
+
 ### Participating Teams
 
 1. ITNLP [Paper](https://aclanthology.org/2021.semeval-1.59.pdf) [GitHub](https://github.com/itnlp606/nlpcb-graph)
