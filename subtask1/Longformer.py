@@ -97,23 +97,6 @@ class Collator:
         
         return out
 
-    def pad_tensor(self, data):
-        #find max length
-        max_length = 0
-        for arr in data:
-            size = len(arr)
-            if size > max_length:
-                max_length = size
-        
-        #pad tensor
-        tensors = []
-        
-        for arr in data:
-            size = len(arr)
-            #length = size[0]
-            tensors.append(torch.nn.functional.pad(torch.LongTensor(arr), (0, max_length - size)))
-
-        return torch.stack(tensors, 0)
 
 
         
