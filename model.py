@@ -58,6 +58,12 @@ class NcgModel:
                     sampler=sampler,
                     collate_fn=self.model.collate,
                 )
+            elif self.config.PIPELINE is Pipeline.SUMMARISATION:
+                return DataLoader(
+                    dataset,
+                    batch_size=self.config.BATCH_SIZE,
+                    collate_fn=self.model.collate,
+                )
 
         if self.config.SAMPLING is Sampling.SHUFFLE:
             # default sampling method: shuffling of data

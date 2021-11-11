@@ -6,6 +6,7 @@ from enum import Enum, auto
 
 class Pipeline(Enum):
     CLASSIFICATION = auto()
+    SUMMARISATION = auto()
     DEFAULT = auto()
 
 

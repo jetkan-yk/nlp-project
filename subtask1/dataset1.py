@@ -35,11 +35,17 @@ class Dataset1(Dataset):
                     self.x.append(sent)
                     self.y.append(label)
         else:
-            # formats data into (article, contributing sentences)
+            # formats data into (article, [contributing sentences])
+            #print(self.sents)
+            
             for idx, sent_list in enumerate(self.sents):
-                for sent in sent_list:
-                    self.x.append(self._stringify(idx))
-                    self.y.append(self._stringify((idx, sent)))
+                self.x.append(self._stringify(idx))
+                #temp = []
+                # for sent in sent_list:
+                #     #self.y.append(self._stringify((idx, sent)))
+                #     temp.append(self._stringify((idx, sent)))
+                # self.y.append(temp)
+                self.y.append(sent_list)
 
     def __len__(self):
         """
