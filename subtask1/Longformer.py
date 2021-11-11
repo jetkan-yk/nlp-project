@@ -37,9 +37,7 @@ class Longformer(nn.Module):
         """
         Given a batch output, predict the final result
         """
-        #outputs will be a tokens of the contributing sentences all flattened into 1 giant sent
-        #need to split them up into indivi sentences again and untokenise them 
-        #but how
+        #need to change output format
         return outputs
 
 
@@ -53,7 +51,7 @@ class Collator:
         articles, c_sents = zip(*batch)
         articles, c_sents = list(articles), list(c_sents)
        
-       #take the articles, prepend and append [cls] [sep] tokens to each sentence
+        #take the articles, prepend and append [cls] [sep] tokens to each sentence
         #flatten every article and every c_sents into a giant string
         #tokenise the giant string
 
@@ -77,10 +75,8 @@ class Collator:
             #encode entire article
             print(flat_article)
             in_seq.append(encode(flat_article))
-
-        #print(self.pad_tensor(c_sents))
-        
-        return self.collator(in_seq), torch.LongTensor(self.pad_arrs(c_sents)) #self.pad_tensor(c_sents)
+    
+        return self.collator(in_seq), torch.LongTensor(self.pad_arrs(c_sents)) 
 
     def pad_arrs(self, data):
         max_length = 0
