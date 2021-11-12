@@ -15,7 +15,7 @@ from sklearn.naive_bayes import MultinomialNB
 from torch import nn, optim
 from torch.utils.data import DataLoader, WeightedRandomSampler
 
-from config import Model, Optimizer, Pipeline, Sampling
+from config import Model, Optimizer, Pipeline, Sampling, Criterion
 
 
 class NcgModel:
@@ -39,6 +39,7 @@ class NcgModel:
         self.pipeline = config["PIPELINE"]
         self.sampling = config["SAMPLING"]
         self.summary_mode = config["SUMMARY_MODE"]
+        self.criterion = config["CRITERION"]
 
         print(f"Using model: {self.model_type.name}\n")
 
@@ -75,7 +76,13 @@ class NcgModel:
             raise NotImplementedError
 
     def _criterion(self):
-        return nn.CrossEntropyLoss()
+        if self.criterion == Criterion.CELOSS:
+            return nn.CrossEntropyLoss()
+        elif self.criterion == Criterion.BCELOSS:
+            return nn.BCELoss()
+        
+        else:
+            raise NotImplementedError
 
     def _optimizer(self):
         if self.optimizer is Optimizer.ADAM:

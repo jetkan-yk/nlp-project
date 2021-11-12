@@ -7,11 +7,14 @@ from sklearn.naive_bayes import MultinomialNB
 
 from subtask1.scibert import SciBert
 
+from subtask1.sentencebert import SentenceBertClass
+
 
 class Pipeline(Enum):
     CLASSIFICATION = auto()
+    EXTRACTIVE = auto()
 
-
+    
 class Sampling(Enum):
     OVERSAMPLING = auto()
     SHUFFLE = auto()
@@ -26,8 +29,14 @@ class Optimizer(Enum):
 class Model(Enum):
     NAIVE_BAYES = MultinomialNB
     SCIBERT = SciBert
+    SENTBERT = SentenceBertClass
 
+    
+class Criterion(Enum):
+    CELOSS = auto()
+    BCELOSS = auto()
 
+    
 DEFAULT = dict(
     SUBTASK=None,
     BATCH_SIZE=32,
@@ -39,24 +48,42 @@ DEFAULT = dict(
     PIPELINE=Pipeline.CLASSIFICATION,
     SAMPLING=Sampling.SHUFFLE,
     TRAIN_RATIO=0.8,
+    CRITERION=Criterion.CELOSS
 )
 
-SBERT_ADAM_OSMP_1 = {
+SBERT_ADAMW_OSMP_1 = {
     **DEFAULT,
     **dict(
         SUBTASK=1,
         EPOCHS=2,
         LEARNING_RATE=2e-5,
         MODEL=Model.SCIBERT,
-        OPTIMIZER=Optimizer.ADAM,
+        OPTIMIZER=Optimizer.ADAMW,
         PIPELINE=Pipeline.CLASSIFICATION,
         SAMPLING=Sampling.OVERSAMPLING,
     ),
 }
 
 NB_ADAMW_OSMP_1 = {
-    **SBERT_ADAM_OSMP_1,
+    **SBERT_ADAMW_OSMP_1,
     **dict(MODEL=Model.NAIVE_BAYES, OPTIMIZER=Optimizer.ADAMW),
 }
 
-NcgConfigs = [DEFAULT, SBERT_ADAM_OSMP_1, NB_ADAMW_OSMP_1]
+SENTB_ADAMW_OSMP_1 = {
+    **DEFAULT,
+    **dict(
+        SUBTASK=1,
+        MODEL=Model.SENTBERT,
+        OPTIMIZER=Optimizer.ADAMW,
+        PIPELINE=Pipeline.EXTRACTIVE,
+        SAMPLING=Sampling.SHUFFLE,
+        MAX_LEN = 512,
+        TRAIN_BATCH_SIZE = 4,
+        VALID_BATCH_SIZE = 4,
+        EPOCHS = 1,
+        LEARNING_RATE = 1e-05,
+        CRITERION = Criterion.BCELOSS
+    ),
+}
+
+NcgConfigs = [DEFAULT, SBERT_ADAMW_OSMP_1, NB_ADAMW_OSMP_1, SENTB_ADAMW_OSMP_1]
