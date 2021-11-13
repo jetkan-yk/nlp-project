@@ -49,10 +49,7 @@ class SentenceBertClass(torch.nn.Module):
         doc_ids = batch["doc_ids"]
         sent_mask = batch["sent_mask"]
         doc_mask = batch["doc_mask"]
-        
-        # TODO: remove
-        print(sent_ids.shape)
-        
+                
         sent_output = self.l1(input_ids=sent_ids, attention_mask=sent_mask) 
         sentence_embeddings = mean_pooling(sent_output, sent_mask) 
 
@@ -69,14 +66,16 @@ class SentenceBertClass(torch.nn.Module):
         pooler = torch.nn.ReLU()(pooler)
         pooler = self.dropout(pooler)
         output = self.classifier(pooler)
-        output = self.classifierSigmoid(output) 
-
+        output = self.classifierSigmoid(output).flatten() 
+        
         return output
     
     def collate(self, batch):
         return self.collator(batch)
 
     def predict(self, outputs):
+        # outputs is a list of scores
+        # to convert into a label, we take any score > threshold as 1 and 0 otherwise
         return outputs
     
     def evaluate(self, preds, labels):
@@ -152,40 +151,6 @@ class collator:
         # creates a dict containing {'sent_ids', 'doc_ids', 'sent_mask', 'doc_mask'}
         batch = BatchEncoding(default_data_collator(encoded_texts))
         
-        targets = torch.tensor(labels, dtype=torch.long)
+        targets = torch.tensor(labels, dtype=torch.float)
 
         return batch, targets
-
-        
-# TODO: remove
-#     def __getitem__(self, index):
-#         # gets sentence in string
-#         sentence = str(self.data.iloc[index].sents)
-#         sentence = " ".join(sentence.split())
-        
-#         # gets document in string
-#         document = str(self.data.iloc[index].docs)
-#         document = " ".join(document.split())
-
-#         # encodes [sentence, document]
-#         inputs = self.tokenizer.batch_encode_plus(
-#             [sentence, document], 
-#             add_special_tokens=True,
-#             max_length=self.max_len,
-#             padding="max_length",
-#             return_token_type_ids=True,
-#             truncation=True
-#         )
-#         ids = inputs['input_ids']
-#         mask = inputs['attention_mask']
-
-#         return {
-#             'sent_ids': torch.tensor(ids[0], dtype=torch.long),
-#             'doc_ids': torch.tensor(ids[1], dtype=torch.long),
-#             'sent_mask': torch.tensor(mask[0], dtype=torch.long),
-#             'doc_mask': torch.tensor(mask[1], dtype=torch.long),
-#             'targets': torch.tensor([self.data.iloc[index].y], dtype=torch.long)
-#         } 
-    
-#     def __len__(self):
-#         return self.len

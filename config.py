@@ -82,7 +82,7 @@ SENTB_ADAMW_OSMP_1 = {
         MAX_LEN = 512,
         BATCH_SIZE = 32,
         EPOCHS = 1,
-        LEARNING_RATE = 1e-05,
+        LEARNING_RATE = 2e-05,
         CRITERION = Criterion.BCELOSS
     ),
 }
