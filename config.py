@@ -79,9 +79,8 @@ SENTB_ADAMW_OSMP_1 = {
         OPTIMIZER=Optimizer.ADAMW,
         PIPELINE=Pipeline.SBERTEXTRACTIVE,
         SAMPLING=Sampling.OVERSAMPLING,
-        MAX_LEN = 512,
-        BATCH_SIZE = 32,
-        EPOCHS = 2,
+        BATCH_SIZE = 8,
+        EPOCHS = 1,
         LEARNING_RATE = 2e-05,
         CRITERION = Criterion.BCELOSS
     ),

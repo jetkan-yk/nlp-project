@@ -18,6 +18,7 @@ from transformers.data.data_collator import default_data_collator
 from torch import cuda
 device = 'cuda' if cuda.is_available() else 'cpu'
 
+SENTENCE_MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
 
 # get mean pooling for sentence bert models 
 # ref https://www.sbert.net/examples/applications/computing-embeddings/README.html#sentence-embeddings-with-transformers
@@ -32,8 +33,9 @@ def mean_pooling(model_output, attention_mask):
 # Creating the customized model, by adding a drop out and a dense layer on top of distil bert to get the final output for the model. 
 # Note that different sentence transformer models may have different in_feature sizes
 class SentenceBertClass(torch.nn.Module):
-    def __init__(self, model_name="sentence-transformers/paraphrase-MiniLM-L3-v2", in_features=384):
+    def __init__(self, model_name="sentence-transformers/paraphrase-MiniLM-L3-v2", in_features=768):
         super(SentenceBertClass, self).__init__()
+        model_name = SENTENCE_MODEL_NAME
         self.l1 = AutoModel.from_pretrained(model_name)
         self.pre_classifier = torch.nn.Linear(in_features*3, 768)
         self.dropout = torch.nn.Dropout(0.3)
@@ -42,7 +44,6 @@ class SentenceBertClass(torch.nn.Module):
         
         self.collator = collator()
 
-#     def forward(self, sent_ids, doc_ids, sent_mask, doc_mask):
     def forward(self, batch):
         # takes in batch data and passes it through model
         sent_ids = batch["sent_ids"]
@@ -67,6 +68,9 @@ class SentenceBertClass(torch.nn.Module):
         pooler = self.dropout(pooler)
         output = self.classifier(pooler)
         output = self.classifierSigmoid(output).flatten() 
+        
+        # TODO: remove
+#         print(output)
         
         return output
     
@@ -106,9 +110,8 @@ class collator:
     """
 
     def __init__(self):
-        sentence_model_name = "sentence-transformers/paraphrase-MiniLM-L3-v2"
-        self.tokenizer = AutoTokenizer.from_pretrained(sentence_model_name) 
-        self.max_len = 512
+        self.tokenizer = AutoTokenizer.from_pretrained(SENTENCE_MODEL_NAME) 
+        self.max_len = 384 # max sequence length of model
         
     def __call__(self, batch):
         """
