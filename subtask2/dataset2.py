@@ -73,7 +73,7 @@ class Dataset2(Dataset):
         """
         Returns the i-th sample's `(x, y)` tuple
         """
-        return self._stringify(self.x[i]), self._stringify(self.y[i])
+        return self.x[i], self.y[i]
 
     def _stringify(self, data):
         """
