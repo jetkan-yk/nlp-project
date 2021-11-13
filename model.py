@@ -121,55 +121,55 @@ class NcgModel:
                     {"vectorizer": tfidf_vect, "classifier": classifier}, outfile
                 )
                 outfile.close()
-            return
 
-        # training of neural models
-        data_loader = self._dataloader(train_data)
-        criterion = self._criterion()
-        optimizer = self._optimizer()
+        else:
+            # training of neural models
+            data_loader = self._dataloader(train_data)
+            criterion = self._criterion()
+            optimizer = self._optimizer()
 
-        print(f"Begin training...")
-        start = datetime.now()
-        for epoch in range(self.epochs):
-            self.model.train()
-            running_loss = 0.0
+            print(f"Begin training...")
+            start = datetime.now()
+            for epoch in range(self.epochs):
+                self.model.train()
+                running_loss = 0.0
 
-            for step, data in enumerate(data_loader):
-                features = data[0].to(self.device)
-                labels = data[1].to(self.device)
+                for step, data in enumerate(data_loader):
+                    features = data[0].to(self.device)
+                    labels = data[1].to(self.device)
 
-                # zero the parameter gradients
-                optimizer.zero_grad()
+                    # zero the parameter gradients
+                    optimizer.zero_grad()
 
-                # do forward propagation
-                preds = self.model(features)
+                    # do forward propagation
+                    preds = self.model(features)
 
-                # do loss calculation
-                loss = criterion(preds, labels)
+                    # do loss calculation
+                    loss = criterion(preds, labels)
 
-                # do backward propagation
-                loss.backward()
+                    # do backward propagation
+                    loss.backward()
 
-                # do parameter optimization step
-                optimizer.step()
+                    # do parameter optimization step
+                    optimizer.step()
 
-                # calculate running loss value
-                running_loss += loss.item()
+                    # calculate running loss value
+                    running_loss += loss.item()
 
-                # log loss
-                if self.summary_mode:
-                    wandb.log({"loss": loss})
+                    # log loss
+                    if self.summary_mode:
+                        wandb.log({"loss": loss})
 
-                # print loss value every 100 steps and reset the running loss
-                if step % 100 == 99:
-                    print(
-                        f"[{epoch + 1}, {step + 1:{4}}] loss: {running_loss / 100:.{3}}"
-                    )
-                    running_loss = 0.0
-        end = datetime.now()
-        print(f"\nTraining finished in {(end - start).seconds / 60.0} minutes.\n")
+                    # print loss value every 100 steps and reset the running loss
+                    if step % 100 == 99:
+                        print(
+                            f"[{epoch + 1}, {step + 1:{4}}] loss: {running_loss / 100:.{3}}"
+                        )
+                        running_loss = 0.0
+            end = datetime.now()
+            print(f"\nTraining finished in {(end - start).seconds / 60.0} minutes.\n")
 
-        save_model(self.subtask, self.model, model_name)
+            save_model(self.subtask, self.model, model_name)
 
     def test(self, test_data, model_name):
         """
@@ -210,36 +210,35 @@ class NcgModel:
 
             #             print("Accuracy: %.2f%%" % ((n_right/float(len(test_y)) * 100)))
 
-            return
+        else:
+            # testing of neural models
+            self.model = load_model(self.subtask, self.model, model_name)
+            # Use default samping method
+            self.sampling = Sampling.SHUFFLE
 
-        # testing of neural models
-        self.model = load_model(self.subtask, self.model, model_name)
-        # Use default samping method
-        self.sampling = Sampling.SHUFFLE
+            data_loader = self._dataloader(test_data)
+            total_score = 0.0
 
-        data_loader = self._dataloader(test_data)
-        total_score = 0.0
+            print(f"Begin testing...")
+            self.model.eval()
+            with torch.no_grad():
+                for data in data_loader:
+                    features = data[0].to(self.device)
+                    labels = data[1].to(self.device)
 
-        print(f"Begin testing...")
-        self.model.eval()
-        with torch.no_grad():
-            for data in data_loader:
-                features = data[0].to(self.device)
-                labels = data[1].to(self.device)
+                    outputs = self.model(features)
+                    preds = self.model.predict(outputs)
+                    tp, fp, _, fn = self.model.evaluate(preds, labels)
+                    batch_score = f1_score(tp, fp, fn)
+                    total_score += batch_score
 
-                outputs = self.model(features)
-                preds = self.model.predict(outputs)
-                tp, fp, _, fn = self.model.evaluate(preds, labels)
-                batch_score = f1_score(tp, fp, fn)
-                total_score += batch_score
+                    if self.summary_mode:
+                        wandb.log({"batch_score": batch_score})
 
-                if self.summary_mode:
-                    wandb.log({"batch_score": batch_score})
-
-        avg_score = total_score / len(data_loader)
-        if self.summary_mode:
-            wandb.log({"f1_score": avg_score})
-        print(f"F1 score: {avg_score:.{3}}\n")
+            avg_score = total_score / len(data_loader)
+            if self.summary_mode:
+                wandb.log({"f1_score": avg_score})
+            print(f"F1 score: {avg_score:.{3}}\n")
 
 
 def save_model(subtask, model: nn.Module, model_name):
