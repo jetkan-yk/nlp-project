@@ -12,7 +12,8 @@ from torch.utils.data import Dataset, DataLoader
 
 # code taken from https://victordibia.com/blog/extractive-summarization/
 
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoTokenizer, AutoModel, BatchEncoding
+from transformers.data.data_collator import default_data_collator
 
 from torch import cuda
 device = 'cuda' if cuda.is_available() else 'cpu'
@@ -48,6 +49,9 @@ class SentenceBertClass(torch.nn.Module):
         doc_ids = batch["doc_ids"]
         sent_mask = batch["sent_mask"]
         doc_mask = batch["doc_mask"]
+        
+        # TODO: remove
+        print(sent_ids.shape)
         
         sent_output = self.l1(input_ids=sent_ids, attention_mask=sent_mask) 
         sentence_embeddings = mean_pooling(sent_output, sent_mask) 
@@ -109,15 +113,9 @@ class collator:
         """
         Receives batch data (docs, doc_labels) and returns a dictionary containing encoded features, labels, etc.
         """
-        docs, doc_labels = zip(*batch)
+        docs_sents, labels = zip(*batch)
         # docs is [sents in doc], doc_labels is [labels for each sent in doc]
-        docs, doc_labels = list(docs), list(doc_labels)
-        
-        # creates sentence, document pairs
-        texts = []
-        for doc in docs:
-            for sent in doc:
-                texts.append([" ".join(sent.split()), " ".join(doc)])
+        docs_sents, labels = list(docs_sents), list(labels)
         
         def encode(sentence, document):
             # encodes [sentence, document]
@@ -130,7 +128,7 @@ class collator:
             #   (5) Pad or truncate the sentence to `max_length`
             #   (6) Create attention masks for [PAD] tokens.
 
-            inputs = self.tokenizer.batch_encode_plus(
+            batch_encoding = self.tokenizer.batch_encode_plus(
                 [sentence, document], 
                 add_special_tokens=True,
                 max_length=self.max_len,
@@ -138,9 +136,9 @@ class collator:
                 return_token_type_ids=True,
                 truncation=True
             )
-            ids = inputs['input_ids']
-            mask = inputs['attention_mask']
-
+            ids = batch_encoding['input_ids']
+            mask = batch_encoding['attention_mask']
+            
             return {
                 'sent_ids': torch.tensor(ids[0], dtype=torch.long),
                 'doc_ids': torch.tensor(ids[1], dtype=torch.long),
@@ -148,25 +146,18 @@ class collator:
                 'doc_mask': torch.tensor(mask[1], dtype=torch.long),
             } 
         
-        encoded_texts = [encode(sentence, document) for sentence, document in texts]
+        encoded_texts = [encode(sentence, document) for sentence, document in docs_sents]
         
-        # converts list of encoded input dicts into dictionary of encoded inputs
-        sent_ids = torch.tensor([encoded_text['sent_ids'] for encoded_text in encoded_texts]).to(device, dtype = torch.long)
-        doc_ids = torch.tensor([encoded_text['doc_ids'] for encoded_text in encoded_texts]).to(device, dtype = torch.long)
-        sent_mask = torch.tensor([encoded_text['sent_mask'] for encoded_text in encoded_texts]).to(device, dtype = torch.long)
-        doc_mask = torch.tensor([encoded_text['doc_mask'] for encoded_text in encoded_texts]).to(device, dtype = torch.long)
-        targets = torch.tensor(doc_labels, dtype=torch.long).to(device, dtype = torch.float)
+        # collates batches of dict-like objects
+        # creates a dict containing {'sent_ids', 'doc_ids', 'sent_mask', 'doc_mask'}
+        batch = BatchEncoding(default_data_collator(encoded_texts))
         
-        batch = {
-                'sent_ids': sent_ids,
-                'doc_ids': doc_ids,
-                'sent_mask': sent_mask,
-                'doc_mask': doc_mask,
-            } 
-        
+        targets = torch.tensor(labels, dtype=torch.long)
+
         return batch, targets
 
         
+# TODO: remove
 #     def __getitem__(self, index):
 #         # gets sentence in string
 #         sentence = str(self.data.iloc[index].sents)

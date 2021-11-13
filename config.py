@@ -13,6 +13,7 @@ from subtask1.sentencebert import SentenceBertClass
 class Pipeline(Enum):
     CLASSIFICATION = auto()
     EXTRACTIVE = auto()
+    SBERTEXTRACTIVE = auto()
 
     
 class Sampling(Enum):
@@ -66,7 +67,8 @@ SBERT_ADAMW_OSMP_1 = {
 
 NB_ADAMW_OSMP_1 = {
     **SBERT_ADAMW_OSMP_1,
-    **dict(MODEL=Model.NAIVE_BAYES, OPTIMIZER=Optimizer.ADAMW),
+    **dict(MODEL=Model.NAIVE_BAYES, 
+           SAMPLING=Sampling.OVERSAMPLING),
 }
 
 SENTB_ADAMW_OSMP_1 = {
@@ -75,11 +77,10 @@ SENTB_ADAMW_OSMP_1 = {
         SUBTASK=1,
         MODEL=Model.SENTBERT,
         OPTIMIZER=Optimizer.ADAMW,
-        PIPELINE=Pipeline.EXTRACTIVE,
+        PIPELINE=Pipeline.SBERTEXTRACTIVE,
         SAMPLING=Sampling.SHUFFLE,
         MAX_LEN = 512,
-        TRAIN_BATCH_SIZE = 4,
-        VALID_BATCH_SIZE = 4,
+        BATCH_SIZE = 32,
         EPOCHS = 1,
         LEARNING_RATE = 1e-05,
         CRITERION = Criterion.BCELOSS

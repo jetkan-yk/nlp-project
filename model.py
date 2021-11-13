@@ -153,6 +153,9 @@ class NcgModel:
 
                 # do loss calculation
                 loss = criterion(preds, labels)
+                
+                # TODO: remove
+                print(loss)
 
                 # do backward propagation
                 loss.backward()

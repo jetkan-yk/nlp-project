@@ -32,6 +32,15 @@ class Dataset1(Dataset):
                     label = int(sent_id in sent_list)
                     self.x.append(sent)
                     self.y.append(label)
+        elif config["PIPELINE"] is Pipeline.SBERTEXTRACTIVE:
+            # [doc, sent, label]
+            for idx, sent_list in enumerate(self.sents):
+                article = self._stringify(idx)
+                for sent_id, sent in enumerate(article):
+                    label = int(sent_id in sent_list)
+                    self.x.append([" ".join(article), sent])
+                    self.y.append(label)
+                    
         elif config["PIPELINE"] is Pipeline.EXTRACTIVE:
             # formats data for extractive summarization task
             # [[sents in document], [labels]] 
@@ -47,6 +56,7 @@ class Dataset1(Dataset):
                 
                 self.x.append(batch_x)
                 self.y.append(batch_y)
+                
         else:
             raise NotImplementedError
 #         else:
