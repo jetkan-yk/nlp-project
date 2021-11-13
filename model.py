@@ -10,13 +10,22 @@ from datetime import datetime
 import sklearn.metrics as metrics
 import torch
 import wandb
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
 from torch import nn, optim
 from torch.utils.data import DataLoader, WeightedRandomSampler
 
-from config import Model, Optimizer, Pipeline, Sampling, Criterion
+from nltk.tokenize import word_tokenize
+from nltk import pos_tag
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from sklearn.preprocessing import LabelEncoder
+from collections import defaultdict
+from nltk.corpus import wordnet as wn
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn import model_selection, naive_bayes
+from imblearn.over_sampling import RandomOverSampler
+import numpy as np
 
+from config import Model, Optimizer, Pipeline, Sampling, Criterion
 
 class NcgModel:
     """
@@ -44,10 +53,14 @@ class NcgModel:
         print(f"Using model: {self.model_type.name}\n")
 
     def _dataloader(self, dataset):
+        # TODO: remove
+        print(self.sampling)
+        print(self.pipeline)
+
         if self.sampling is Sampling.OVERSAMPLING:
             if (self.pipeline is not Pipeline.CLASSIFICATION) and (self.pipeline is not Pipeline.SBERTEXTRACTIVE):
-                raise TypeError("Cannot oversampling non-classification problem")
-
+                raise TypeError("Cannot oversample non-classification problem")
+                
             _, labels = zip(*dataset)
 
             class_count = list(Counter(labels).values())
@@ -109,18 +122,26 @@ class NcgModel:
         if self.model_type is Model.NAIVE_BAYES:
             # get [features], [labels]
             loader = DataLoader(train_data, batch_size=len(train_data))
-
+            
             train_x, train_y = next(iter(loader))
+                                    
+            if self.sampling is Sampling.OVERSAMPLING:
+                train_x = np.array(train_x).reshape(-1, 1)
 
-            # encode features with tf-idf
-            tfidf_vect = TfidfVectorizer(max_features=5000)
+                ros = RandomOverSampler(random_state=0)
+                train_x, train_y = ros.fit_resample(train_x, train_y)
+            
+                train_x = train_x.flatten()
+            
+            # encode features with tf-idf, reduce to lowercase, remove stopwords
+            tfidf_vect = TfidfVectorizer(max_features=5000, lowercase=True, stop_words='english')
             tfidf_vect.fit(train_x)
 
             train_x = tfidf_vect.transform(train_x)
-
+            
             # train classifier
-            classifier = MultinomialNB().fit(train_x, train_y)
-
+            classifier = naive_bayes.MultinomialNB().fit(train_x, train_y)
+        
             # save classifier
             model_path = os.path.join(f"subtask{self.subtask}", model_name)
             with open(model_path, "wb") as outfile:
@@ -195,10 +216,10 @@ class NcgModel:
             loader = DataLoader(test_data, batch_size=len(test_data))
 
             test_x, test_y = next(iter(loader))
-
+            
             # encode features with tf-idf
             test_x = tfidf_vect.transform(test_x)
-
+            
             print(f"Begin testing...")
             # predict labels
             y_score = classifier.predict(test_x)
@@ -209,19 +230,11 @@ class NcgModel:
             score = metrics.f1_score(labels, preds)
             print(f"F1 score: {score:.{3}}\n")
 
-            # calculate accuracy
-            #             n_right = 0
-            #             for i in range(len(y_score)):
-            #                 if y_score[i] == test_y[i]:
-            #                     n_right += 1
-
-            #             print("Accuracy: %.2f%%" % ((n_right/float(len(test_y)) * 100)))
-
             return
 
         # testing of neural models
         self.model = load_model(self.subtask, self.model, model_name)
-        # Use default samping method
+        # Use default samping method for validation/test data
         self.sampling = Sampling.SHUFFLE
 
         data_loader = self._dataloader(test_data)

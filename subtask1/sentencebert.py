@@ -10,7 +10,7 @@ import pandas as pd
 import transformers
 from torch.utils.data import Dataset, DataLoader 
 
-# code taken from https://victordibia.com/blog/extractive-summarization/
+# ref: https://victordibia.com/blog/extractive-summarization/
 
 from transformers import AutoTokenizer, AutoModel, BatchEncoding
 from transformers.data.data_collator import default_data_collator
@@ -60,7 +60,7 @@ class SentenceBertClass(torch.nn.Module):
         # elementwise product of sentence embs and doc embs
         combined_features = sentence_embeddings * doc_embeddings  
 
-        # Concatenate input features and their elementwise product
+        # concatenate input features and their elementwise product
         concat_features = torch.cat((sentence_embeddings, doc_embeddings, combined_features), dim=1)   
         
         pooler = self.pre_classifier(concat_features) 
@@ -68,9 +68,6 @@ class SentenceBertClass(torch.nn.Module):
         pooler = self.dropout(pooler)
         output = self.classifier(pooler)
         output = self.classifierSigmoid(output).flatten() 
-        
-        # TODO: remove
-#         print(output)
         
         return output
     

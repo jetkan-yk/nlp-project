@@ -65,9 +65,11 @@ SBERT_ADAMW_OSMP_1 = {
     ),
 }
 
-NB_ADAMW_OSMP_1 = {
+NB_OSMP_1 = {
     **SBERT_ADAMW_OSMP_1,
     **dict(MODEL=Model.NAIVE_BAYES, 
+           BATCH_SIZE=1e6,
+           PIPELINE=Pipeline.CLASSIFICATION,
            SAMPLING=Sampling.OVERSAMPLING),
 }
 
@@ -86,4 +88,4 @@ SENTB_ADAMW_OSMP_1 = {
     ),
 }
 
-NcgConfigs = [DEFAULT, SBERT_ADAMW_OSMP_1, NB_ADAMW_OSMP_1, SENTB_ADAMW_OSMP_1]
+NcgConfigs = [DEFAULT, SBERT_ADAMW_OSMP_1, NB_OSMP_1, SENTB_ADAMW_OSMP_1]
