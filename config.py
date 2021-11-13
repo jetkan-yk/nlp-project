@@ -9,6 +9,8 @@ from subtask1.scibert import SciBert
 
 from subtask1.sentencebert import SentenceBertClass
 
+from subtask1.scibertbilstm import SCIBERTBILSTMClass
+
 
 class Pipeline(Enum):
     CLASSIFICATION = auto()
@@ -31,6 +33,7 @@ class Model(Enum):
     NAIVE_BAYES = MultinomialNB
     SCIBERT = SciBert
     SENTBERT = SentenceBertClass
+    SCIBERTBILSTM = SCIBERTBILSTMClass
 
     
 class Criterion(Enum):
@@ -65,6 +68,20 @@ SBERT_ADAMW_OSMP_1 = {
     ),
 }
 
+SBERTBILSTM_ADAMW_OSMP_1 = {
+    **DEFAULT,
+    **dict(
+        SUBTASK=1,
+        EPOCHS=2,
+        LEARNING_RATE=1e-5,
+        MODEL=Model.SCIBERTBILSTM,
+        OPTIMIZER=Optimizer.ADAMW,
+        PIPELINE=Pipeline.CLASSIFICATION,
+        SAMPLING=Sampling.OVERSAMPLING,
+        CRITERION=Criterion.CELOSS
+    ),
+}
+
 NB_OSMP_1 = {
     **SBERT_ADAMW_OSMP_1,
     **dict(MODEL=Model.NAIVE_BAYES, 
@@ -88,4 +105,4 @@ SENTB_ADAMW_OSMP_1 = {
     ),
 }
 
-NcgConfigs = [DEFAULT, SBERT_ADAMW_OSMP_1, NB_OSMP_1, SENTB_ADAMW_OSMP_1]
+NcgConfigs = [DEFAULT, SBERT_ADAMW_OSMP_1, NB_OSMP_1, SENTB_ADAMW_OSMP_1, SBERTBILSTM_ADAMW_OSMP_1]
