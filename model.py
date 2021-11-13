@@ -39,6 +39,7 @@ class NcgModel:
         self.pipeline = config["PIPELINE"]
         self.sampling = config["SAMPLING"]
         self.summary_mode = config["SUMMARY_MODE"]
+        self.weight_decay = config["WEIGHT_DECAY"]
 
         print(f"Using model: {self.model_type.name}\n")
 
@@ -89,6 +90,7 @@ class NcgModel:
                 self.model.parameters(),
                 lr=self.lr,
                 momentum=self.momentum,
+                weight_decay=self.weight_decay
             )
 
         else:
