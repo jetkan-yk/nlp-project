@@ -6,6 +6,7 @@ from enum import Enum, auto
 from sklearn.naive_bayes import MultinomialNB
 
 from subtask1.scibert import SciBert
+from subtask2.SciBert_BiLSTM_CRF import SciBert_BiLSTM_CRF
 
 
 class Pipeline(Enum):
@@ -26,6 +27,7 @@ class Optimizer(Enum):
 class Model(Enum):
     NAIVE_BAYES = MultinomialNB
     SCIBERT = SciBert
+    SciBert_BiLSTM_CRF = SciBert_BiLSTM_CRF
 
 
 DEFAULT = dict(
@@ -60,6 +62,26 @@ NB_ADAMW_OSMP_1 = {
     **dict(MODEL=Model.NAIVE_BAYES, OPTIMIZER=Optimizer.ADAMW),
 }
 
-SUBTASK2 = {**DEFAULT, **dict(SUBTASK=2)}
 
-NcgConfigs = [DEFAULT, SBERT_ADAM_OSMP_1, NB_ADAMW_OSMP_1, SUBTASK2]
+#### Model hyperparameters defined
+EMBEDDING_DIM = 768  # Since SciBERT encodes tokens of a sentence in (768,1) dimension.
+HIDDEN_DIM = 200  # For BiLSTM
+
+#### Maps BIO labels to index numbers and vice-versa.
+tag_to_ix = {"B": 0, "I": 1, "O": 2, START_TAG: 3, STOP_TAG: 4}
+ix_to_tag = {v: k for k, v in tag_to_ix.items()}
+
+SciBert_BiLSTM_CRF = {
+    **DEFAULT,
+    **dict(
+        SUBTASK=2,
+        EPOCHS=1,
+        LEARNING_RATE=0.01,
+        WEIGHT_DECAY=1e-4,
+        MODEL=Model.SciBert_BiLSTM_CRF(tag_to_ix, EMBEDDING_DIM, HIDDEN_DIM),
+        OPTIMIZER=Optimizer.SGD,
+    ),
+}
+
+
+NcgConfigs = [DEFAULT, SBERT_ADAM_OSMP_1, NB_ADAMW_OSMP_1, SciBert_BiLSTM_CRF]

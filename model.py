@@ -90,7 +90,7 @@ class NcgModel:
                 self.model.parameters(),
                 lr=self.lr,
                 momentum=self.momentum,
-                weight_decay=self.weight_decay
+                weight_decay=self.weight_decay,
             )
 
         else:
@@ -123,6 +123,46 @@ class NcgModel:
                     {"vectorizer": tfidf_vect, "classifier": classifier}, outfile
                 )
                 outfile.close()
+
+        elif self.model_type is Model.SciBert_BiLSTM_CRF:
+            optimizer = self._optimizer()
+            print(f"Begin training...")
+            start = datetime.now()
+            for epoch in range(self.epochs):
+                self.model.train()
+                running_loss = 0.0
+                step = 0
+
+                for (x, y) in train_data:
+                    sentence_in = self.model.prepare_sequence(x.split()).to(self.device)
+                    targets = torch.tensor(
+                        [2] + [self.model.tag_to_ix[tag] for tag in y] + [2],
+                        dtype=torch.long,
+                    ).to(self.device)
+
+                    self.model.zero_grad()
+                    loss = self.model.neg_log_likelihood(sentence_in, targets)
+                    loss.backward()
+                    optimizer.step()
+
+                    # calculate running loss value
+                    running_loss += loss.item()
+
+                    # log loss
+                    if self.summary_mode:
+                        wandb.log({"loss": loss})
+
+                    # print loss value every 100 steps and reset the running loss
+                    if step % 100 == 99:
+                        print(
+                            f"[{epoch + 1}, {step + 1:{4}}] loss: {running_loss / 100:.{3}}"
+                        )
+                        running_loss = 0.0
+                    step += 1
+
+            end = datetime.now()
+            print(f"\nTraining finished in {(end - start).seconds / 60.0} minutes.\n")
+            save_model(self.subtask, self.model, model_name)
 
         else:
             # training of neural models
