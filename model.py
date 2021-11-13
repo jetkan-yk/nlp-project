@@ -58,7 +58,7 @@ class NcgModel:
         print(self.pipeline)
 
         if self.sampling is Sampling.OVERSAMPLING:
-            if (self.pipeline is not Pipeline.CLASSIFICATION) and (self.pipeline is not Pipeline.SBERTEXTRACTIVE):
+            if (self.pipeline not in [Pipeline.CLASSIFICATION, Pipeline.SBERTEXTRACTIVE]):
                 raise TypeError("Cannot oversample non-classification problem")
                 
             _, labels = zip(*dataset)
