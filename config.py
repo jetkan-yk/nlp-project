@@ -68,7 +68,7 @@ EMBEDDING_DIM = 768  # Since SciBERT encodes tokens of a sentence in (768,1) dim
 HIDDEN_DIM = 200  # For BiLSTM
 
 #### Maps BIO labels to index numbers and vice-versa.
-tag_to_ix = {"B": 0, "I": 1, "O": 2, START_TAG: 3, STOP_TAG: 4}
+tag_to_ix = {"B": 0, "I": 1, "O": 2, "<START>": 3, "<STOP>": 4}
 ix_to_tag = {v: k for k, v in tag_to_ix.items()}
 
 SciBert_BiLSTM_CRF = {
