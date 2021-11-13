@@ -45,7 +45,7 @@ class NcgModel:
 
     def _dataloader(self, dataset):
         if self.sampling is Sampling.OVERSAMPLING:
-            if self.pipeline is not Pipeline.CLASSIFICATION:
+            if (self.pipeline is not Pipeline.CLASSIFICATION) and (self.pipeline is not Pipeline.SBERTEXTRACTIVE):
                 raise TypeError("Cannot oversampling non-classification problem")
 
             _, labels = zip(*dataset)
@@ -153,9 +153,6 @@ class NcgModel:
 
                 # do loss calculation
                 loss = criterion(preds, labels)
-                
-                # TODO: remove
-                print(loss)
 
                 # do backward propagation
                 loss.backward()
