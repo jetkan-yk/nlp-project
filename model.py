@@ -27,10 +27,19 @@ class NcgModel:
         self.subtask = config["SUBTASK"]
         self.device = config["DEVICE"]
         self.model_type = config["MODEL"]
-        try:
-            self.model = config["MODEL"].value().to(self.device)
-        except AttributeError:
+        if self.model_type == Model.NAIVE_BAYES:
             self.model = config["MODEL"].value()
+        elif self.model_type == Model.SciBert_BiLSTM_CRF:
+            tag_to_ix = config["TAG_TO_IX"]
+            embedding_dim = config["EMBEDDING_DIM"]
+            hidden_dim = config["HIDDEN DIM"]
+            self.model = (
+                config["MODEL"]
+                .value(tag_to_ix, embedding_dim, hidden_dim)
+                .to(self.device)
+            )
+        else:
+            self.model = config["MODEL"].value().to(self.device)
         self.batch_size = config["BATCH_SIZE"]
         self.epochs = config["EPOCHS"]
         self.lr = config["LEARNING_RATE"]

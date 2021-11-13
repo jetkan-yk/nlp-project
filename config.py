@@ -63,10 +63,6 @@ NB_ADAMW_OSMP_1 = {
 }
 
 
-#### Model hyperparameters defined
-EMBEDDING_DIM = 768  # Since SciBERT encodes tokens of a sentence in (768,1) dimension.
-HIDDEN_DIM = 200  # For BiLSTM
-
 #### Maps BIO labels to index numbers and vice-versa.
 tag_to_ix = {"B": 0, "I": 1, "O": 2, "<START>": 3, "<STOP>": 4}
 ix_to_tag = {v: k for k, v in tag_to_ix.items()}
@@ -75,11 +71,15 @@ SciBert_BiLSTM_CRF = {
     **DEFAULT,
     **dict(
         SUBTASK=2,
+        EMBEDDING_DIM=768,
         EPOCHS=1,
+        HIDDEN_DIM=200,
+        IX_TO_TAG=ix_to_tag,
         LEARNING_RATE=0.01,
-        WEIGHT_DECAY=1e-4,
-        MODEL=Model.SciBert_BiLSTM_CRF(tag_to_ix, EMBEDDING_DIM, HIDDEN_DIM),
+        MODEL=Model.SciBert_BiLSTM_CRF,
         OPTIMIZER=Optimizer.SGD,
+        TAG_TO_IX=tag_to_ix,
+        WEIGHT_DECAY=1e-4,
     ),
 }
 
