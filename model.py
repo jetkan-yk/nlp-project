@@ -32,7 +32,7 @@ class NcgModel:
         elif self.model_type == Model.SciBert_BiLSTM_CRF:
             tag_to_ix = config["TAG_TO_IX"]
             embedding_dim = config["EMBEDDING_DIM"]
-            hidden_dim = config["HIDDEN DIM"]
+            hidden_dim = config["HIDDEN_DIM"]
             self.model = (
                 config["MODEL"]
                 .value(tag_to_ix, embedding_dim, hidden_dim)
