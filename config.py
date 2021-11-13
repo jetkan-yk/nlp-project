@@ -69,23 +69,21 @@ SBERT_ADAMW_OSMP_1 = {
 }
 
 SBERTBILSTM_ADAMW_OSMP_1 = {
-    **DEFAULT,
+    **SBERT_ADAMW_OSMP_1,
     **dict(
         SUBTASK=1,
         EPOCHS=2,
-        LEARNING_RATE=1e-5,
+        LEARNING_RATE=2e-5,
         MODEL=Model.SCIBERTBILSTM,
         OPTIMIZER=Optimizer.ADAMW,
         PIPELINE=Pipeline.CLASSIFICATION,
         SAMPLING=Sampling.OVERSAMPLING,
-        CRITERION=Criterion.CELOSS
     ),
 }
 
 NB_OSMP_1 = {
-    **SBERT_ADAMW_OSMP_1,
+    **DEFAULT,
     **dict(MODEL=Model.NAIVE_BAYES, 
-           BATCH_SIZE=1e6,
            PIPELINE=Pipeline.CLASSIFICATION,
            SAMPLING=Sampling.OVERSAMPLING),
 }
@@ -98,7 +96,7 @@ SENTB_ADAMW_OSMP_1 = {
         OPTIMIZER=Optimizer.ADAMW,
         PIPELINE=Pipeline.SBERTEXTRACTIVE,
         SAMPLING=Sampling.OVERSAMPLING,
-        BATCH_SIZE = 8,
+        BATCH_SIZE = 16,
         EPOCHS = 1,
         LEARNING_RATE = 2e-05,
         CRITERION = Criterion.BCELOSS
