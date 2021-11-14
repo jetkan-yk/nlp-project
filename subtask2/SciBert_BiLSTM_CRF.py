@@ -176,3 +176,59 @@ class SciBert_BiLSTM_CRF(nn.Module):
         max_score = vec[0, self.argmax(vec)]
         max_score_broadcast = max_score.view(1, -1).expand(1, vec.size()[1])
         return max_score + torch.log(torch.sum(torch.exp(vec - max_score_broadcast)))
+
+    #### Test Functions
+
+    def tags_to_pos(self, tags):
+        # remove START and END tag.
+        tags = tags[1:-1]
+
+        phrases_pos = []
+        len_sentence = len(tags)
+
+        i = 0
+        while i < len_sentence:
+            if tags[i] == self.tag_to_ix["B"]:
+                start_id = i
+                j = i + 1
+                while j < len_sentence:
+                    if tags[j] != self.tag_to_ix["I"]:
+                        break
+                    j += 1
+                i = j - 1
+                end_id = j
+                phrases_pos.append((start_id, end_id))
+            i += 1
+
+        return phrases_pos
+
+    def predict(self, outputs, targets):
+        """
+        Given a batch output, predict the final result
+        """
+        # outputs and targets are a list of tags of a sentence, for eg: [2, 0, 1, 1, 1, 2, 0, 1, 2, 2]
+        # this function convert the list of tuples of (start_id, end_id),
+        # which is the word-level position of phrases of the sentence
+        # Eg, input: [2, 0, 2, 2, 0, 1, 1, 2, 2], output: [(0, 1), (3, 6)]
+
+        output_phrases = self.tags_to_pos(outputs)
+        target_phrases = self.tags_to_pos(targets)
+        return output_phrases, target_phrases
+
+    def evaluate(self, preds, labels):
+        """
+        Evaluates the predicted results against the expected labels and
+        returns the tp, fp, tn, fn values for the result batch
+        """
+        tp = fp = tn = fn = 0
+
+        tp_data = [i for i in preds if i in labels]
+        tp = tp + len(tp_data)
+
+        fp_data = [i for i in preds if i not in labels]
+        fp = fp + len(fp_data)
+
+        fn_data = [i for i in labels if i not in preds]
+        fn = fn + len(fn_data)
+
+        return tp, fp, tn, fn
