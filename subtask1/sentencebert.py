@@ -18,7 +18,8 @@ from transformers.data.data_collator import default_data_collator
 from torch import cuda
 device = 'cuda' if cuda.is_available() else 'cpu'
 
-SENTENCE_MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
+# SENTENCE_MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
+SENTENCE_MODEL_NAME = "gsarti/scibert-nli"
 
 # get mean pooling for sentence bert models 
 # ref https://www.sbert.net/examples/applications/computing-embeddings/README.html#sentence-embeddings-with-transformers
@@ -58,7 +59,9 @@ class SentenceBertClass(torch.nn.Module):
         doc_embeddings = mean_pooling(doc_output, doc_mask)
 
         # elementwise product of sentence embs and doc embs
-        combined_features = sentence_embeddings * doc_embeddings  
+#         combined_features = sentence_embeddings * doc_embeddings
+
+        combined_features = abs(sentence_embeddings - doc_embeddings)
 
         # concatenate input features and their elementwise product
         concat_features = torch.cat((sentence_embeddings, doc_embeddings, combined_features), dim=1)   
@@ -131,7 +134,7 @@ class collator:
 
             batch_encoding = self.tokenizer.batch_encode_plus(
                 [sentence, document], 
-                add_special_tokens=True,
+#                 add_special_tokens=True,
                 max_length=self.max_len,
                 padding="max_length",
                 return_token_type_ids=True,
