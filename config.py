@@ -84,6 +84,7 @@ SBERTBILSTM_ADAMW_OSMP_1 = {
 NB_OSMP_1 = {
     **DEFAULT,
     **dict(MODEL=Model.NAIVE_BAYES, 
+           SUBTASK=1,
            PIPELINE=Pipeline.CLASSIFICATION,
            SAMPLING=Sampling.OVERSAMPLING),
 }

@@ -75,10 +75,11 @@ class SentenceBertClass(torch.nn.Module):
         return self.collator(batch)
 
     def predict(self, outputs):
-        """
-        Maps predicted batch outputs to labels
-        """
-        return torch.argmax(outputs, dim=1)
+        # outputs is a list of scores
+        # to convert into a label, we take any score > threshold as 1 and 0 otherwise
+        threshold = 0.6
+        outputs = torch.tensor([1 if score > threshold else 0 for score in outputs])
+        return outputs
     
     def evaluate(self, preds, labels):
         """

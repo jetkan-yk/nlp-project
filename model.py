@@ -25,6 +25,18 @@ from sklearn import model_selection, naive_bayes
 from imblearn.over_sampling import RandomOverSampler
 import numpy as np
 
+# fix seed
+import random
+
+seed = 123
+torch.manual_seed(seed)
+torch.cuda.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
+np.random.seed(seed)
+random.seed(seed)
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.deterministic = True
+
 from config import Model, Optimizer, Pipeline, Sampling, Criterion
 
 class NcgModel:
