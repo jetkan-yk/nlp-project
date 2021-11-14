@@ -104,7 +104,7 @@ SENTB_ADAMW_OSMP_1 = {
         SAMPLING=Sampling.OVERSAMPLING,
         BATCH_SIZE=16,
         EPOCHS=1,
-        LEARNING_RATE=1e-05,
+        LEARNING_RATE=2e-05,
         CRITERION=Criterion.BCELOSS,
     ),
 }
