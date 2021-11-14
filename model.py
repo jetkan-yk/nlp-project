@@ -259,6 +259,47 @@ class NcgModel:
 
             #             print("Accuracy: %.2f%%" % ((n_right/float(len(test_y)) * 100)))
 
+        elif self.model_type is Model.SciBert_BiLSTM_CRF:
+            self.model = load_model(self.subtask, self.model, model_name)
+            total_score = 0.0
+
+            print(f"Begin testing...")
+            self.model.eval()
+            Tp = Fp = Tn = Fn = 0
+            with torch.no_grad():
+                for (x, y) in test_data:
+                    sentence_in = self.model.prepare_sequence(x.split()).to(self.device)
+                    targets = torch.tensor(
+                        [2] + [self.model.tag_to_ix[tag] for tag in y] + [2],
+                        dtype=torch.long,
+                    ).to(self.device)
+
+                    # model output is in the format [score, list of tags]
+                    outputs = self.model(sentence_in)
+                    output_phrases, target_phrases = self.model.predict(
+                        outputs[1], targets
+                    )
+
+                    tp, fp, tn, fn = self.model.evaluate(output_phrases, target_phrases)
+                    batch_score = f1_score(tp, fp, fn)
+                    total_score += batch_score
+
+                    Tp += tp
+                    Fp += fp
+                    Tn += tn
+                    Fn += fn
+
+                    if self.summary_mode:
+                        wandb.log({"batch_score": batch_score})
+
+            avg_score = total_score / len(test_data)
+            score = f1_score(Tp, Fp, Fn)
+            if self.summary_mode:
+                wandb.log({"f1_score": avg_score})
+            print(
+                f"F1 score (each sentence): {avg_score:.{3}}, F1 score (all phrases): {score:.{3}}\n"
+            )
+
         else:
             # testing of neural models
             self.model = load_model(self.subtask, self.model, model_name)
