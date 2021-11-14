@@ -10,6 +10,13 @@ STOP_TAG = "<STOP>"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
+runLSTM = True
+
+# bert-base-uncased
+# allenai/scibert_scivocab_uncased
+# allenai/biomed_roberta_base
+# microsoft/deberta-base
+
 
 class SciBert_BiLSTM_CRF(nn.Module):
     def __init__(self, tag_to_ix, embedding_dim, hidden_dim):
@@ -28,7 +35,8 @@ class SciBert_BiLSTM_CRF(nn.Module):
         )
 
         # Maps the output of the LSTM into tag space.
-        self.hidden2tag = nn.Linear(hidden_dim, self.tagset_size)
+        self.hidden1tag = nn.Linear(self.embedding_dim, self.hidden_dim)
+        self.hidden2tag = nn.Linear(self.hidden_dim, self.tagset_size)
 
         # Pretrained SciBert downloaded from allenai
         self.modell = AutoModel.from_pretrained("allenai/scibert_scivocab_uncased")
@@ -78,11 +86,24 @@ class SciBert_BiLSTM_CRF(nn.Module):
         # The tokenized sentence is passed through SciBERT and output from LSTM is mapped into tag space
         outputs = self.modell(**sentence, output_hidden_states=True)
         scibert_out = ((outputs[2][12])[0]).view(len(sentence["input_ids"][0]), 1, -1)
-        self.hidden = self.init_hidden()
-        lstm_out, self.hidden = self.lstm(scibert_out, self.hidden)
-        lstm_out = lstm_out.view(len(sentence["input_ids"][0]), self.hidden_dim)
-        lstm_feats = self.hidden2tag(lstm_out)
-        return lstm_feats
+
+        if runLSTM:
+            self.hidden = self.init_hidden()
+            lstm_out, self.hidden = self.lstm(scibert_out, self.hidden)
+            # print('aa', scibert_out.size(), lstm_out.size())
+            lstm_out = lstm_out.view(len(sentence["input_ids"][0]), self.hidden_dim)
+            # print('runLSTM', scibert_out.size(), lstm_out.size())
+            feats = self.hidden2tag(lstm_out)
+        else:
+            scibert_out1 = scibert_out.view(
+                len(sentence["input_ids"][0]), self.embedding_dim
+            )
+            scibert_out2 = self.hidden1tag(scibert_out1)
+            feats = self.hidden2tag(scibert_out2)
+            # print('noLSTM', scibert_out2.size(), feats.size())
+        return feats
+
+        # return lstm_feats
 
     def _score_sentence(self, feats, tags):
         # Gives the score of a provided tag sequence
@@ -93,8 +114,10 @@ class SciBert_BiLSTM_CRF(nn.Module):
                 tags,
             ]
         )
+        # print(feats.size(), tags.size())
         for i, feat in enumerate(feats):
-            score = score + self.transitions[tags[i + 1], tags[i]] + feat[tags[i + 1]]
+            score = score + self.transitions[tags[i + 1], tags[i]]
+            score = score + feat[tags[i + 1]]
         score = score + self.transitions[self.tag_to_ix[STOP_TAG], tags[-1]]
         return score
 
@@ -162,6 +185,7 @@ class SciBert_BiLSTM_CRF(nn.Module):
 
     # The function uses SciBERT tokenizer to prepare the sentence to be fed into SciBERT
     def prepare_sequence(self, seq):
+        x = " ".join(seq)
         for count, i in enumerate(seq):
             temp = self.tokenizer.tokenize(i)
             # Only the first token of the word has been considered(same as in NER paper)
@@ -169,6 +193,7 @@ class SciBert_BiLSTM_CRF(nn.Module):
                 seq[count] = temp[0]
         sentences = " ".join(seq)
         inputs = self.tokenizer(sentences, return_tensors="pt")
+        # print(x, sentences, len(inputs))
         return inputs
 
     # Compute log sum exp in a numerically stable way for the forward algorithm

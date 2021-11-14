@@ -34,7 +34,7 @@ def main(args):
     model = NcgModel(config)
 
     if args.train or args.train == args.test:
-        model.train(train_data, args.m)
+        model.train(train_data, args.m, test_data)
     if args.test or args.train == args.test:
         model.test(test_data, args.m)
 

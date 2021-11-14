@@ -135,7 +135,7 @@ class NcgModel:
         else:
             raise NotImplementedError
 
-    def train(self, train_data, model_name):
+    def train(self, train_data, model_name, test_data):
         """
         Trains the model using `train_data` and saves the model in `model_name`
         """
@@ -187,6 +187,7 @@ class NcgModel:
                         [2] + [self.model.tag_to_ix[tag] for tag in y] + [2],
                         dtype=torch.long,
                     ).to(self.device)
+                    # print(sentence_in.input_ids.size(), targets.size())
 
                     self.model.zero_grad()
                     loss = self.model.neg_log_likelihood(sentence_in, targets)
@@ -207,10 +208,13 @@ class NcgModel:
                         )
                         running_loss = 0.0
 
+                save_model(self.subtask, self.model, model_name)
+                self.test(test_data, model_name)
+
             end = datetime.now()
             print(f"\nTraining finished in {(end - start).seconds / 60.0} minutes.\n")
             save_model(self.subtask, self.model, model_name)
-
+            # test(test_data, model_name)
         else:
             # training of neural models
             data_loader = self._dataloader(train_data)
