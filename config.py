@@ -17,7 +17,7 @@ class Pipeline(Enum):
     EXTRACTIVE = auto()
     SBERTEXTRACTIVE = auto()
 
-    
+
 class Sampling(Enum):
     OVERSAMPLING = auto()
     SHUFFLE = auto()
@@ -35,12 +35,12 @@ class Model(Enum):
     SENTBERT = SentenceBertClass
     SCIBERTBILSTM = SCIBERTBILSTMClass
 
-    
+
 class Criterion(Enum):
     CELOSS = auto()
     BCELOSS = auto()
 
-    
+
 DEFAULT = dict(
     SUBTASK=None,
     BATCH_SIZE=32,
@@ -52,7 +52,7 @@ DEFAULT = dict(
     PIPELINE=Pipeline.CLASSIFICATION,
     SAMPLING=Sampling.SHUFFLE,
     TRAIN_RATIO=0.8,
-    CRITERION=Criterion.CELOSS
+    CRITERION=Criterion.CELOSS,
 )
 
 SBERT_ADAMW_OSMP_1 = {
@@ -83,10 +83,12 @@ SBERTBILSTM_ADAMW_OSMP_1 = {
 
 NB_OSMP_1 = {
     **DEFAULT,
-    **dict(MODEL=Model.NAIVE_BAYES, 
-           SUBTASK=1,
-           PIPELINE=Pipeline.CLASSIFICATION,
-           SAMPLING=Sampling.OVERSAMPLING),
+    **dict(
+        MODEL=Model.NAIVE_BAYES,
+        SUBTASK=1,
+        PIPELINE=Pipeline.CLASSIFICATION,
+        SAMPLING=Sampling.OVERSAMPLING,
+    ),
 }
 
 SENTB_ADAMW_OSMP_1 = {
@@ -97,11 +99,17 @@ SENTB_ADAMW_OSMP_1 = {
         OPTIMIZER=Optimizer.ADAMW,
         PIPELINE=Pipeline.SBERTEXTRACTIVE,
         SAMPLING=Sampling.OVERSAMPLING,
-        BATCH_SIZE = 16,
-        EPOCHS = 1,
-        LEARNING_RATE = 1e-05,
-        CRITERION = Criterion.BCELOSS
+        BATCH_SIZE=16,
+        EPOCHS=1,
+        LEARNING_RATE=1e-05,
+        CRITERION=Criterion.BCELOSS,
     ),
 }
 
-NcgConfigs = [DEFAULT, SBERT_ADAMW_OSMP_1, NB_OSMP_1, SENTB_ADAMW_OSMP_1, SBERTBILSTM_ADAMW_OSMP_1]
+NcgConfigs = [
+    DEFAULT,
+    SBERT_ADAMW_OSMP_1,
+    NB_OSMP_1,
+    SENTB_ADAMW_OSMP_1,
+    SBERTBILSTM_ADAMW_OSMP_1,
+]

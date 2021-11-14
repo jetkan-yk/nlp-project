@@ -4,29 +4,27 @@ Loads, saves model and implements the `NcgModel` class
 
 import os
 import pickle
-from collections import Counter
-from datetime import datetime
-
-import sklearn.metrics as metrics
-import torch
-import wandb
-from torch import nn, optim
-from torch.utils.data import DataLoader, WeightedRandomSampler
-
-from nltk.tokenize import word_tokenize
-from nltk import pos_tag
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
-from sklearn.preprocessing import LabelEncoder
-from collections import defaultdict
-from nltk.corpus import wordnet as wn
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn import model_selection, naive_bayes
-from imblearn.over_sampling import RandomOverSampler
-import numpy as np
 
 # fix seed
 import random
+from collections import Counter, defaultdict
+from datetime import datetime
+
+import numpy as np
+import sklearn.metrics as metrics
+import torch
+import wandb
+from imblearn.over_sampling import RandomOverSampler
+from nltk import pos_tag
+from nltk.corpus import stopwords
+from nltk.corpus import wordnet as wn
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
+from sklearn import model_selection, naive_bayes
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import LabelEncoder
+from torch import nn, optim
+from torch.utils.data import DataLoader, WeightedRandomSampler
 
 seed = 123
 torch.manual_seed(seed)
@@ -37,7 +35,8 @@ random.seed(seed)
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
 
-from config import Model, Optimizer, Pipeline, Sampling, Criterion
+from config import Criterion, Model, Optimizer, Pipeline, Sampling
+
 
 class NcgModel:
     """
@@ -70,9 +69,9 @@ class NcgModel:
         print(self.pipeline)
 
         if self.sampling is Sampling.OVERSAMPLING:
-            if (self.pipeline not in [Pipeline.CLASSIFICATION, Pipeline.SBERTEXTRACTIVE]):
+            if self.pipeline not in [Pipeline.CLASSIFICATION, Pipeline.SBERTEXTRACTIVE]:
                 raise TypeError("Cannot oversample non-classification problem")
-                
+
             _, labels = zip(*dataset)
 
             class_count = list(Counter(labels).values())
@@ -105,7 +104,6 @@ class NcgModel:
             return nn.CrossEntropyLoss()
         elif self.criterion == Criterion.BCELOSS:
             return nn.BCELoss()
-        
         else:
             raise NotImplementedError
 
@@ -134,26 +132,28 @@ class NcgModel:
         if self.model_type is Model.NAIVE_BAYES:
             # get [features], [labels]
             loader = DataLoader(train_data, batch_size=len(train_data))
-            
+
             train_x, train_y = next(iter(loader))
-                                    
+
             if self.sampling is Sampling.OVERSAMPLING:
                 train_x = np.array(train_x).reshape(-1, 1)
 
                 ros = RandomOverSampler(random_state=0)
                 train_x, train_y = ros.fit_resample(train_x, train_y)
-            
+
                 train_x = train_x.flatten()
-            
+
             # encode features with tf-idf, reduce to lowercase, remove stopwords
-            tfidf_vect = TfidfVectorizer(max_features=5000, lowercase=True, stop_words='english')
+            tfidf_vect = TfidfVectorizer(
+                max_features=5000, lowercase=True, stop_words="english"
+            )
             tfidf_vect.fit(train_x)
 
             train_x = tfidf_vect.transform(train_x)
-            
+
             # train classifier
             classifier = naive_bayes.MultinomialNB().fit(train_x, train_y)
-        
+
             # save classifier
             model_path = os.path.join(f"subtask{self.subtask}", model_name)
             with open(model_path, "wb") as outfile:
@@ -228,10 +228,10 @@ class NcgModel:
             loader = DataLoader(test_data, batch_size=len(test_data))
 
             test_x, test_y = next(iter(loader))
-            
+
             # encode features with tf-idf
             test_x = tfidf_vect.transform(test_x)
-            
+
             print(f"Begin testing...")
             # predict labels
             y_score = classifier.predict(test_x)
