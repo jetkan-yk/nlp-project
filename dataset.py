@@ -74,7 +74,7 @@ def parse_phrase(phrase_str_list):
     phrase_dict = defaultdict(list)
     for row in phrase_list:
         sent = int(row[0]) - 1
-        phrase = row[1], row[2]
+        phrase = int(row[1]), int(row[2])
         phrase_dict[sent].append(phrase)
     return phrase_dict
 
