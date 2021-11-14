@@ -23,21 +23,48 @@ class Dataset1(Dataset):
         self.x = []
         self.y = []
 
-        # formats data for classification task (sent, label),
-        # where label == 1 for contributing sentences and label == 0 otherwise
         if config["PIPELINE"] is Pipeline.CLASSIFICATION:
+            # formats data for classification task (sent, label),
+            # where label == 1 for contributing sentences and label == 0 otherwise
             for idx, sent_list in enumerate(self.sents):
                 article = self._stringify(idx)
                 for sent_id, sent in enumerate(article):
                     label = int(sent_id in sent_list)
                     self.x.append(sent)
                     self.y.append(label)
-        else:
-            # formats data into (article, contributing sentences)
+        elif config["PIPELINE"] is Pipeline.SBERTEXTRACTIVE:
+            # [doc, sent, label]
             for idx, sent_list in enumerate(self.sents):
-                for sent in sent_list:
-                    self.x.append(self._stringify(idx))
-                    self.y.append(self._stringify((idx, sent)))
+                article = self._stringify(idx)
+                for sent_id, sent in enumerate(article):
+                    label = int(sent_id in sent_list)
+                    self.x.append([" ".join(article), sent])
+                    self.y.append(label)
+                    
+        elif config["PIPELINE"] is Pipeline.EXTRACTIVE:
+            # formats data for extractive summarization task
+            # [[sents in document], [labels]] 
+            # label == 1 for contributing sentences and label == 0 otherwise
+            for idx, sent_list in enumerate(self.sents):
+                article = self._stringify(idx)
+                batch_x = []
+                batch_y = []
+                for sent_id, sent in enumerate(article):
+                    label = int(sent_id in sent_list)
+                    batch_x.append(sent)
+                    batch_y.append(label)
+                
+                self.x.append(batch_x)
+                self.y.append(batch_y)
+                
+        else:
+            raise NotImplementedError
+#         else:
+#             # formats data into (article, contributing sentences)
+#             for idx, sent_list in enumerate(self.sents):
+#                 for sent in sent_list:
+#                     self.x.append(self._stringify(idx))
+#                     self.y.append(self._stringify((idx, sent)))
 
     def __len__(self):
         """
