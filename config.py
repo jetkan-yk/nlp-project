@@ -102,10 +102,10 @@ SENTB_ADAMW_OSMP_1 = {
         OPTIMIZER=Optimizer.ADAMW,
         PIPELINE=Pipeline.SBERTEXTRACTIVE,
         SAMPLING=Sampling.OVERSAMPLING,
-        BATCH_SIZE = 16,
-        EPOCHS = 1,
-        LEARNING_RATE = 2e-05,
-        CRITERION = Criterion.BCELOSS
+        BATCH_SIZE=16,
+        EPOCHS=1,
+        LEARNING_RATE=2e-05,
+        CRITERION=Criterion.BCELOSS,
     ),
 }
 
