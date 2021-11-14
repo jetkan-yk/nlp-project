@@ -1,4 +1,6 @@
-# CS4248 G17 NLP Project
+# CS4248 G17 NLP Final Project
+
+By Kan Yip Keng, Lin Mei An, Yang Zi Yun, Yew Kai Zhe
 
 ## About
 
@@ -31,7 +33,7 @@ Additionally, install other dependencies in `requirements.txt` using `conda` or 
 1. Make sure you have installed all the dependencies mentioned above
 2. Clone or download this repository, then open a terminal and navigate to this folder
 3. Train, test & evaluate the model by running `python3 main.py {config}` which:
-   1. Select the `config`-th configurations from `config.py`. Use `python3 main.py -h`
+   1. Select the `config`-th configurations from `config.py`. Enter `python3 main.py 0`
       to see all available configurations.
    2. Load all data from the `data/` folder
    3. Randomly split the dataset into training & testing set
@@ -56,29 +58,6 @@ These optional flags can be combined into one single command line:
 `python3 main.py 1 -d data-small/ --summary -s scibert`
 
 `python3 main.py 2 --train`
-
-### Development
-
-1. Checkout to the develoment branch for the first time using `git checkout -t origin/subtask1`
-
-2. Implement the subtask's dataset & model in the `subtask/` folder
-
-3. Configure the `config.py` details
-
-4. Login and visit [here](https://wandb.ai/authorize) to retrieve your `wandb` API key for summary mode
-
-### Using the SoC Cluster Nodes
-
-1. Connect to the SoC network via NUS WiFi, SoC VPN or Sunfire
-   > `ssh your_soc_id@sunfire.comp.nus.edu.sg`
-2. SSH to any of the `xgpg0` to `xgpg2` nodes
-   > `ssh xgpg0`
-3. Git clone this repo into your SoC cluster nodes
-   > `git clone https://github.com/jetkan-yk/nlp-project.git`
-
-Besides, you can use SCP to transfer files from your local computer via
-
-> `scp -r your_local_folder/ your_soc_id@sunfire.comp.nus.edu.sg:~/`
 
 ## Project Structure
 
@@ -120,13 +99,6 @@ The data folders is organized as follows:
         │   └── ...                                    # there are K articles annotated for each task, so this repeats for the remaining K-1 annotated articles
         └── ...                                        # if there are N task folders overall, then this repeats N-1 more times
 
-### Branches
-
-- `main` - root branch
-- `demo-a2` - a demo mode that emulates assignment 2's dataset & model _(deprecated)_
-- `subtask1` - development branch for subtask 1
-- `subtask2` - development branch for subtask 2
-
 ## Resources
 
 ### Official Links
@@ -154,20 +126,3 @@ NCG Task [Paper](https://arxiv.org/pdf/2106.07385.pdf) [GitHub](https://github.c
 6. Duluth [Paper](https://aclanthology.org/2021.semeval-1.60.pdf) [GitHub](https://github.com/anmartin94/DuluthSemEval2021Task11)
 
 7. YNU-HPCC [Paper](https://aclanthology.org/2021.semeval-1.58.pdf) [GitHub](https://github.com/maxinge8698/SemEval2021-Task11)
-
-## Project Requirement
-
-The breakdown of the final project marks will be according to the following criteria:
-
-- **Content (50%)**: Is the work valid and technically sound? Is the work significant and of impact? Is relevant work in the literature cited?
-- **Presentation (30%)**: Is the work presented in a clear, logical, and coherent manner? (including both oral presentation and final project report)
-- **Novelty (20%)**: Is the work carried out novel? Does it advance the state of the art?
-
-Each final project report is in the form of an ACL conference-style short paper. The main content of the paper is limited to 4 pages, with the references taking up a maximum of 1 additional page. You must use the ACL 2021 conference paper style files available at the following (latex or Microsoft WORD):
-
-<https://www.overleaf.com/latex/templates/instructions-for-acl-ijcnlp-2021-proceedings/mhxffkjdwymb>
-<https://2021.aclweb.org/downloads/acl-ijcnlp2021-templates.zip>
-
-The page limit must be strictly adhered to. Marks will be deducted if the main content of your paper exceeds the 4-page limit, or the references exceed 1 page, or the font size is not Times Roman 11-point font.
-
-Each project team must also submit the source code implemented in the project, all external (supporting) code and data, and instructions on how to run their code. Each team will give a 15-minute oral presentation in a video recording at the end of the course.

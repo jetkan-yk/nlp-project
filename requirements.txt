@@ -3,3 +3,5 @@ pandas
 sklearn
 transformers
 wandb
+nltk
+imblearn
