@@ -6,6 +6,7 @@ import os
 import pickle
 from collections import Counter
 from datetime import datetime
+from nltk.util import pr
 
 import sklearn.metrics as metrics
 import torch
@@ -48,6 +49,7 @@ class NcgModel:
         self.subtask = config["SUBTASK"]
         self.device = config["DEVICE"]
         self.model_type = config["MODEL"]
+        print(config["MODEL"])
         try:
             self.model = config["MODEL"].value().to(self.device)
         except AttributeError:
@@ -79,8 +81,8 @@ class NcgModel:
             class_weights = 1.0 / torch.tensor(class_count)
 
     def _dataloader(self, dataset):
-        if self.config.SAMPLING is Sampling.OVERSAMPLING:
-            if self.config.PIPELINE is Pipeline.CLASSIFICATION:
+        if self.sampling is Sampling.OVERSAMPLING:
+            if self.pipeline is Pipeline.CLASSIFICATION:
                 _, labels = zip(*dataset)
 
                 # labels are in int format
@@ -96,14 +98,14 @@ class NcgModel:
 
                 return DataLoader(
                     dataset,
-                    batch_size=self.config.BATCH_SIZE,
+                    batch_size=self.batch_size,
                     sampler=sampler,
                     collate_fn=self.model.collate,
                 )
-            elif self.config.PIPELINE is Pipeline.SUMMARISATION:
+            elif self.pipeline is Pipeline.SUMMARISATION:
                 return DataLoader(
                     dataset,
-                    batch_size=self.config.BATCH_SIZE,
+                    batch_size=self.batch_size,
                     collate_fn=self.model.collate,
                 )
 
@@ -207,7 +209,7 @@ class NcgModel:
 
                 # do loss calculation
                 print('calc loss')
-                if self.config.PIPELINE == Pipeline.SUMMARISATION:
+                if self.pipeline == Pipeline.SUMMARISATION:
                     loss = preds[0]
 
                     #do backward propagation
@@ -276,7 +278,7 @@ class NcgModel:
             print(f"F1 score: {score:.{3}}\n")
 
             return
-
+            
         # testing of neural models
         self.model = load_model(self.subtask, self.model, model_name)
         # Use default samping method for validation/test data
@@ -284,21 +286,23 @@ class NcgModel:
 
         data_loader = self._dataloader(test_data)
         total_score = 0.0
-
         print(f"Begin testing...")
         self.model.eval()
+
         with torch.no_grad():
             for data in data_loader:
                 features = data[0].to(self.device)
                 labels = data[1].to(self.device)
-                print("labels:")
-                print(labels)
                 
                 outputs = self.model(features)
                 preds = self.model.predict(outputs)
-                tp, fp, _, fn = self.model.evaluate(preds, labels)
-                batch_score = f1_score(tp, fp, fn)
-                total_score += batch_score
+                if self.model is Model.T5:
+                    precision, recall = self.model.evaluate(preds, labels)
+                    total_score += rouge_f1score(precision, recall)
+                else:
+                    tp, fp, _, fn = self.model.evaluate(preds, labels)
+                    batch_score = f1_score(tp, fp, fn)
+                    total_score += batch_score
 
                 if self.summary_mode:
                     wandb.log({"batch_score": batch_score})
@@ -344,3 +348,10 @@ def f1_score(tp, fp, fn):
         return 0
 
     return tp / (tp + 0.5 * (fp + fn))
+
+
+def rouge_f1score(precision, recall):
+    if precision == 0 or recall == 0:
+        return 0
+    else:
+        return 2 * (precision * recall) / (precision + recall)

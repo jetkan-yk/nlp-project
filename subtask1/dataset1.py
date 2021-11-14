@@ -89,8 +89,7 @@ class Dataset1(Dataset):
                             #if is contributing sentence, label as 1 else as 0
                             #labels.append(1 if sent_idx in sent_list else 0)
                             
-                            #if is contributing sentence, add idx to labels
-                            #index re positioned to start at 0 respective to the article segment
+                            #if is contributing sentence, add to labels
                             if sent_idx in sent_list:
                                 labels.append(self._stringify((idx, sent_idx)))
                     #append title of paper to the start
@@ -101,7 +100,6 @@ class Dataset1(Dataset):
                     #if length of labels = 0 then skip over the segment cos it does not have any contributing sentences
                     if len(labels) != 0:
                         self.x.append(seg)
-                        #print(labels)
                         self.y.append(' '.join(labels))    
         else:
             raise NotImplementedError

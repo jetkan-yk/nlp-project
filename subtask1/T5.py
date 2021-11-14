@@ -26,7 +26,7 @@ class T5(nn.Module):
         decoder_inputs = x['decoder_input_ids'].contiguous()
         output = self.model(input_ids, attention_mask, decoder_inputs)
         #output = self.model.generate(input_ids, max_length=20)
-        return output#output.int().float()
+        return output
 
     def collate(self, batch):
         """
@@ -40,6 +40,28 @@ class T5(nn.Module):
         """
         return outputs
 
+    def evaluate(self, preds, labels):
+        """
+        Evaluates the predicted results against the expected labels and
+        returns the tp, fp, tn, fn values for the result batch
+        """
+        total_match = 0
+        pred_length = 0
+        label_length = 0
+        recall = precision = 0
+        for pred, label in zip(preds, labels):
+            for t in pred.tolist():
+                pred_length += 1
+                for l in label.tolist():
+                    label_length += 1
+                    if int(t) == int(l):
+                        total_match += 1
+
+        recall = total_match/label_length
+        precision = total_match/pred_length     
+
+        return precision, recall
+        
 class Collator:
 
     def __init__(self):
@@ -81,7 +103,4 @@ class Collator:
             encoded['decoder_input_ids'] = out_seq[idx]['input_ids']
             in_seq.append(encoded)
 
-        
-        print(in_seq)
-        print(out_seq)
         return self.collator(in_seq), self.collator(out_seq)
