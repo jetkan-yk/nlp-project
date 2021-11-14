@@ -140,9 +140,8 @@ class NcgModel:
             for epoch in range(self.epochs):
                 self.model.train()
                 running_loss = 0.0
-                step = 0
 
-                for (x, y) in train_data:
+                for step, (x, y) in enumerate(train_data):
                     sentence_in = self.model.prepare_sequence(x.split()).to(self.device)
                     targets = torch.tensor(
                         [2] + [self.model.tag_to_ix[tag] for tag in y] + [2],
@@ -167,7 +166,6 @@ class NcgModel:
                             f"[{epoch + 1}, {step + 1:{4}}] loss: {running_loss / 100:.{3}}"
                         )
                         running_loss = 0.0
-                    step += 1
 
             end = datetime.now()
             print(f"\nTraining finished in {(end - start).seconds / 60.0} minutes.\n")
