@@ -2,8 +2,6 @@ import math
 from config import Pipeline
 from torch.utils.data import Dataset
 
-from .config1 import Config1
-
 
 class Dataset1(Dataset):
     """
@@ -14,7 +12,7 @@ class Dataset1(Dataset):
         y = a contributing sentence (a `string`)
     """
 
-    def __init__(self, names, articles, sents, phrases):
+    def __init__(self, names, articles, sents, phrases, config):
         """
         Initializes the dataset for subtask 1
         """
@@ -26,27 +24,41 @@ class Dataset1(Dataset):
         self.x = []
         self.y = []
 
-        # formats data for classification task (sent, label),
-        # where label == 1 for contributing sentences and label == 0 otherwise
-        if Config1.PIPELINE is Pipeline.CLASSIFICATION:
+        if config["PIPELINE"] is Pipeline.CLASSIFICATION:
+            # formats data for classification task (sent, label),
+            # where label == 1 for contributing sentences and label == 0 otherwise
             for idx, sent_list in enumerate(self.sents):
                 article = self._stringify(idx)
                 for sent_id, sent in enumerate(article):
                     label = int(sent_id in sent_list)
                     self.x.append(sent)
                     self.y.append(label)
-        else:
-            # formats data into (article, [contributing sentences])
-            #print(self.sents)
-            
-            # for idx, sent_list in enumerate(self.sents):
-            #     self.x.append(self._stringify(idx))
-            #     #temp = []
-            #     # for sent in sent_list:
-            #     #     #self.y.append(self._stringify((idx, sent)))
-            #     #     temp.append(self._stringify((idx, sent)))
-            #     # self.y.append(temp)
-            #     self.y.append(sent_list)
+                    
+        elif config["PIPELINE"] is Pipeline.SBERTEXTRACTIVE:
+            # [doc, sent, label]
+            for idx, sent_list in enumerate(self.sents):
+                article = self._stringify(idx)
+                for sent_id, sent in enumerate(article):
+                    label = int(sent_id in sent_list)
+                    self.x.append([" ".join(article), sent])
+                    self.y.append(label)
+                    
+        elif config["PIPELINE"] is Pipeline.EXTRACTIVE:
+            # formats data for extractive summarization task
+            # [[sents in document], [labels]] 
+            # label == 1 for contributing sentences and label == 0 otherwise
+            for idx, sent_list in enumerate(self.sents):
+                article = self._stringify(idx)
+                batch_x = []
+                batch_y = []
+                for sent_id, sent in enumerate(article):
+                    label = int(sent_id in sent_list)
+                    batch_x.append(sent)
+                    batch_y.append(label)
+                
+                self.x.append(batch_x)
+                self.y.append(batch_y)
+        elif config["PIPELINE"] is Pipeline.SUMMARISATION:
 
             #process data in this manner:
             #avg no. of tokens / sent = 20
@@ -90,8 +102,9 @@ class Dataset1(Dataset):
                     if len(labels) != 0:
                         self.x.append(seg)
                         #print(labels)
-                        self.y.append(' '.join(labels))
-                    
+                        self.y.append(' '.join(labels))    
+        else:
+            raise NotImplementedError
 
     def __len__(self):
         """

@@ -3,38 +3,80 @@ Loads, saves model and implements the `NcgModel` class
 """
 
 import os
+import pickle
 from collections import Counter
 from datetime import datetime
 
+import sklearn.metrics as metrics
 import torch
+import wandb
 from torch import nn, optim
 from torch.utils.data import DataLoader, WeightedRandomSampler
 
-from config import Optimizer, Pipeline, Sampling
-from subtask1.config1 import Config1
-from subtask2.config2 import Config2
+from nltk.tokenize import word_tokenize
+from nltk import pos_tag
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from sklearn.preprocessing import LabelEncoder
+from collections import defaultdict
+from nltk.corpus import wordnet as wn
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn import model_selection, naive_bayes
+from imblearn.over_sampling import RandomOverSampler
+import numpy as np
 
+# fix seed
+import random
+
+seed = 123
+torch.manual_seed(seed)
+torch.cuda.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
+np.random.seed(seed)
+random.seed(seed)
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.deterministic = True
+
+from config import Model, Optimizer, Pipeline, Sampling, Criterion
 
 class NcgModel:
     """
     A model class that is powered by a `PyTorch nn.Module` subclass.
     """
 
-    def __init__(self, subtask, device):
-        self.subtask = subtask
-        self.device = device
+    def __init__(self, config):
+        self.subtask = config["SUBTASK"]
+        self.device = config["DEVICE"]
+        self.model_type = config["MODEL"]
+        try:
+            self.model = config["MODEL"].value().to(self.device)
+        except AttributeError:
+            self.model = config["MODEL"].value()
+        self.batch_size = config["BATCH_SIZE"]
+        self.epochs = config["EPOCHS"]
+        self.lr = config["LEARNING_RATE"]
+        self.momentum = config["MOMENTUM"]
+        self.optimizer = config["OPTIMIZER"]
+        self.pipeline = config["PIPELINE"]
+        self.sampling = config["SAMPLING"]
+        self.summary_mode = config["SUMMARY_MODE"]
+        self.criterion = config["CRITERION"]
 
-        # determines hyperparameters, model for each subtask
-        if self.subtask == 1:
-            self.config = Config1
-        elif self.subtask == 2:
-            self.config = Config2
-        else:
-            raise KeyError
+        print(f"Using model: {self.model_type.name}\n")
 
-        self.model = self.config.MODEL().to(self.device)
+    def _dataloader(self, dataset):
+        # TODO: remove
+        print(self.sampling)
+        print(self.pipeline)
 
-        print(f"{self.model}\n")
+        if self.sampling is Sampling.OVERSAMPLING:
+            if (self.pipeline not in [Pipeline.CLASSIFICATION, Pipeline.SBERTEXTRACTIVE]):
+                raise TypeError("Cannot oversample non-classification problem")
+                
+            _, labels = zip(*dataset)
+
+            class_count = list(Counter(labels).values())
+            class_weights = 1.0 / torch.tensor(class_count)
 
     def _dataloader(self, dataset):
         if self.config.SAMPLING is Sampling.OVERSAMPLING:
@@ -65,42 +107,89 @@ class NcgModel:
                     collate_fn=self.model.collate,
                 )
 
-        if self.config.SAMPLING is Sampling.SHUFFLE:
-            # default sampling method: shuffling of data
+        elif self.sampling is Sampling.SHUFFLE:
             return DataLoader(
                 dataset,
-                batch_size=self.config.BATCH_SIZE,
+                batch_size=self.batch_size,
                 shuffle=True,
                 collate_fn=self.model.collate,
             )
 
+        else:
+            raise NotImplementedError
+
     def _criterion(self):
-        if self.config.PIPELINE == Pipeline.SUMMARISATION:
+        if self.criterion == Criterion.CELOSS:
+            return nn.CrossEntropyLoss()
+        elif self.criterion == Criterion.BCELOSS:
+            return nn.BCELoss()
+        elif self.criterion == Criterion.MSELOSS:
             return nn.MSELoss()
         else:
-            return nn.CrossEntropyLoss()
+            raise NotImplementedError
 
     def _optimizer(self):
-        if self.config.OPTIMIZER is Optimizer.ADAM:
-            return optim.Adam(self.model.parameters(), lr=self.config.LEARNING_RATE)
+        if self.optimizer is Optimizer.ADAM:
+            return optim.Adam(self.model.parameters(), lr=self.lr)
 
-        if self.config.OPTIMIZER is Optimizer.SGD:
+        elif self.optimizer is Optimizer.ADAMW:
+            return optim.AdamW(self.model.parameters(), lr=self.lr)
+
+        elif self.optimizer is Optimizer.SGD:
             return optim.SGD(
                 self.model.parameters(),
-                lr=self.config.LEARNING_RATE,
-                momentum=self.config.MOMENTUM,
+                lr=self.lr,
+                momentum=self.momentum,
             )
+
+        else:
+            raise NotImplementedError
 
     def train(self, train_data, model_name):
         """
         Trains the model using `train_data` and saves the model in `model_name`
         """
+        # training of naive bayes classifier
+        if self.model_type is Model.NAIVE_BAYES:
+            # get [features], [labels]
+            loader = DataLoader(train_data, batch_size=len(train_data))
+            
+            train_x, train_y = next(iter(loader))
+                                    
+            if self.sampling is Sampling.OVERSAMPLING:
+                train_x = np.array(train_x).reshape(-1, 1)
+
+                ros = RandomOverSampler(random_state=0)
+                train_x, train_y = ros.fit_resample(train_x, train_y)
+            
+                train_x = train_x.flatten()
+            
+            # encode features with tf-idf, reduce to lowercase, remove stopwords
+            tfidf_vect = TfidfVectorizer(max_features=5000, lowercase=True, stop_words='english')
+            tfidf_vect.fit(train_x)
+
+            train_x = tfidf_vect.transform(train_x)
+            
+            # train classifier
+            classifier = naive_bayes.MultinomialNB().fit(train_x, train_y)
+        
+            # save classifier
+            model_path = os.path.join(f"subtask{self.subtask}", model_name)
+            with open(model_path, "wb") as outfile:
+                pickle.dump(
+                    {"vectorizer": tfidf_vect, "classifier": classifier}, outfile
+                )
+                outfile.close()
+            return
+
+        # training of neural models
         data_loader = self._dataloader(train_data)
         criterion = self._criterion()
         optimizer = self._optimizer()
 
+        print(f"Begin training...")
         start = datetime.now()
-        for epoch in range(self.config.EPOCHS):
+        for epoch in range(self.epochs):
             self.model.train()
             running_loss = 0.0
 
@@ -139,6 +228,10 @@ class NcgModel:
                     # calculate running loss value
                     running_loss += loss.item()
 
+                # log loss
+                if self.summary_mode:
+                    wandb.log({"loss": loss})
+
                 # print loss value every 100 steps and reset the running loss
                 if step % 100 == 99:
                     print(
@@ -155,11 +248,44 @@ class NcgModel:
         """
         Tests the `model_name` model in the subtask folder using `test_data`
         """
+        # testing of naive bayes classifier
+        if self.model_type is Model.NAIVE_BAYES:
+            # load checkpoint
+            model_path = os.path.join(f"subtask{self.subtask}", model_name)
+            f = open(model_path, "rb")
+            checkpoint = pickle.load(f)
+            tfidf_vect = checkpoint["vectorizer"]
+            classifier = checkpoint["classifier"]
+
+            # get [features], [labels]
+            loader = DataLoader(test_data, batch_size=len(test_data))
+
+            test_x, test_y = next(iter(loader))
+            
+            # encode features with tf-idf
+            test_x = tfidf_vect.transform(test_x)
+            
+            print(f"Begin testing...")
+            # predict labels
+            y_score = classifier.predict(test_x)
+            preds = y_score
+            labels = test_y
+
+            # calculate f1 score
+            score = metrics.f1_score(labels, preds)
+            print(f"F1 score: {score:.{3}}\n")
+
+            return
+
+        # testing of neural models
         self.model = load_model(self.subtask, self.model, model_name)
+        # Use default samping method for validation/test data
+        self.sampling = Sampling.SHUFFLE
 
         data_loader = self._dataloader(test_data)
-        batch_score = 0.0
+        total_score = 0.0
 
+        print(f"Begin testing...")
         self.model.eval()
         with torch.no_grad():
             for data in data_loader:
@@ -170,11 +296,17 @@ class NcgModel:
                 
                 outputs = self.model(features)
                 preds = self.model.predict(outputs)
-                print("preds:")
-                print(preds)
-                batch_score += evaluate(preds, labels)
+                tp, fp, _, fn = self.model.evaluate(preds, labels)
+                batch_score = f1_score(tp, fp, fn)
+                total_score += batch_score
 
-        print(f"Accuracy: {batch_score / len(data_loader):.{3}}\n")
+                if self.summary_mode:
+                    wandb.log({"batch_score": batch_score})
+
+        avg_score = total_score / len(data_loader)
+        if self.summary_mode:
+            wandb.log({"f1_score": avg_score})
+        print(f"F1 score: {avg_score:.{3}}\n")
 
 
 def save_model(subtask, model: nn.Module, model_name):
@@ -198,27 +330,6 @@ def load_model(subtask, model: nn.Module, model_name):
     print(f"Loaded model from {model_path}\n")
 
     return model
-
-
-def evaluate(preds, labels):
-    """
-    Evaluates the predicted results against the expected labels and
-    returns a f1-score for the result batch
-    """
-    # TODO: implement evaluate function for non binary-class problems
-    tp = fp = fn = tn = 0
-
-    for pred, label in zip(preds, labels):
-        if pred == 1 and label == 1:
-            tp += 1
-        if pred == 1 and label == 0:
-            fp += 1
-        if pred == 0 and label == 1:
-            fn += 1
-        if pred == 0 and label == 0:
-            tn += 1
-
-    return f1_score(tp, fp, fn)
 
 
 def f1_score(tp, fp, fn):

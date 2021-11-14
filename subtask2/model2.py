@@ -6,10 +6,6 @@ from torch import nn
 
 
 class Model2(nn.Module):
-    """
-    A `PyTorch nn.Module` subclass for subtask 2.
-    """
-
     def __init__(self):
         super().__init__()
         # TODO: Implement model here
@@ -31,3 +27,14 @@ class Model2(nn.Module):
         """
         # TODO: Implement predict here
         raise NotImplementedError
+
+    def evaluate(self, preds, labels):
+        """
+        Evaluates the predicted results against the expected labels and
+        returns the tp, fp, tn, fn values for the result batch
+        """
+        tp = fp = tn = fn = 0
+
+        # TODO: Implement evaluate here
+
+        return tp, fp, tn, fn

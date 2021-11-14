@@ -2,7 +2,7 @@
 Overrides default hyperparameters for subtask 1.
 """
 
-from config import NcgConfig, Optimizer, Pipeline, Sampling
+from config import Criterion, NcgConfig, Optimizer, Pipeline, Sampling
 
 from subtask1.scibert import SciBert
 from subtask1.T5 import T5
@@ -18,3 +18,4 @@ class Config1(NcgConfig):
     OPTIMIZER = Optimizer.ADAM
     PIPELINE = Pipeline.SUMMARISATION #Pipeline.CLASSIFICATION
     SAMPLING = Sampling.OVERSAMPLING
+    CRITERION = Criterion.MSELOSS

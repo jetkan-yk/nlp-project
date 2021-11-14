@@ -67,14 +67,14 @@ def parse_sent(sent_str_list):
 def parse_phrase(phrase_str_list):
     """
     Parses a list of `string` phrase list into a `dict` that maps the contributing sentence id
-    to a list of `string` phrase
+    to a list of (phrase_start_idx, phrase_end_idx) tuples
     """
     phrase_list = map(lambda phrase_str: phrase_str.split("\t", 4), phrase_str_list)
 
     phrase_dict = defaultdict(list)
     for row in phrase_list:
         sent = int(row[0]) - 1
-        phrase = row[-1]
+        phrase = row[1], row[2]
         phrase_dict[sent].append(phrase)
     return phrase_dict
 
@@ -92,18 +92,18 @@ class NcgDataset(Dataset):
         y = a list of phrases (a list of `string`)
     """
 
-    def __init__(self, subtask, data_dir):
-        self.subtask = subtask
+    def __init__(self, config, data_dir):
+        subtask = config["SUBTASK"]
         names, articles, sents, phrases = load_data(data_dir)
 
         print(f"Loaded data from {data_dir}\n")
 
-        if self.subtask == 1:
-            self.dataset = Dataset1(names, articles, sents, phrases)
-        elif self.subtask == 2:
-            self.dataset = Dataset2(names, articles, sents, phrases)
+        if subtask == 1:
+            self.dataset = Dataset1(names, articles, sents, phrases, config)
+        elif subtask == 2:
+            self.dataset = Dataset2(names, articles, sents, phrases, config)
         else:
-            raise KeyError
+            raise KeyError(f"Invalid subtask number: {subtask}")
 
     def __len__(self):
         """
