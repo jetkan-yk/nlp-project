@@ -122,11 +122,10 @@ SciBert_BiLSTM_CRF = {
         EPOCHS=1,
         HIDDEN_DIM=200,
         IX_TO_TAG=ix_to_tag,
-        LEARNING_RATE=0.01,
+        LEARNING_RATE=2e-5,
         MODEL=Model.SciBert_BiLSTM_CRF,
-        OPTIMIZER=Optimizer.SGD,
+        OPTIMIZER=Optimizer.ADAMW,
         TAG_TO_IX=tag_to_ix,
-        WEIGHT_DECAY=1e-4,
     ),
 }
 
