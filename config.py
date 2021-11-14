@@ -6,6 +6,7 @@ from enum import Enum, auto
 from sklearn.naive_bayes import MultinomialNB
 
 from subtask1.scibert import SciBert
+from subtask2.SciBert_BiLSTM_CRF import SciBert_BiLSTM_CRF
 
 from subtask1.sentencebert import SentenceBertClass
 
@@ -32,6 +33,7 @@ class Optimizer(Enum):
 class Model(Enum):
     NAIVE_BAYES = MultinomialNB
     SCIBERT = SciBert
+    SciBert_BiLSTM_CRF = SciBert_BiLSTM_CRF
     SENTBERT = SentenceBertClass
     SCIBERTBILSTM = SCIBERTBILSTMClass
 
@@ -52,6 +54,7 @@ DEFAULT = dict(
     PIPELINE=Pipeline.CLASSIFICATION,
     SAMPLING=Sampling.SHUFFLE,
     TRAIN_RATIO=0.8,
+    WEIGHT_DECAY=0,
     CRITERION=Criterion.CELOSS,
 )
 
@@ -106,10 +109,33 @@ SENTB_ADAMW_OSMP_1 = {
     ),
 }
 
+
+#### Maps BIO labels to index numbers and vice-versa.
+tag_to_ix = {"B": 0, "I": 1, "O": 2, "<START>": 3, "<STOP>": 4}
+ix_to_tag = {v: k for k, v in tag_to_ix.items()}
+
+SciBert_BiLSTM_CRF = {
+    **DEFAULT,
+    **dict(
+        SUBTASK=2,
+        EMBEDDING_DIM=768,
+        EPOCHS=1,
+        HIDDEN_DIM=200,
+        IX_TO_TAG=ix_to_tag,
+        LEARNING_RATE=0.01,
+        MODEL=Model.SciBert_BiLSTM_CRF,
+        OPTIMIZER=Optimizer.SGD,
+        TAG_TO_IX=tag_to_ix,
+        WEIGHT_DECAY=1e-4,
+    ),
+}
+
+
 NcgConfigs = [
     DEFAULT,
     SBERT_ADAMW_OSMP_1,
     NB_OSMP_1,
     SENTB_ADAMW_OSMP_1,
     SBERTBILSTM_ADAMW_OSMP_1,
+    SciBert_BiLSTM_CRF,
 ]

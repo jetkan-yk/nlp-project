@@ -47,10 +47,19 @@ class NcgModel:
         self.subtask = config["SUBTASK"]
         self.device = config["DEVICE"]
         self.model_type = config["MODEL"]
-        try:
-            self.model = config["MODEL"].value().to(self.device)
-        except AttributeError:
+        if self.model_type == Model.NAIVE_BAYES:
             self.model = config["MODEL"].value()
+        elif self.model_type == Model.SciBert_BiLSTM_CRF:
+            tag_to_ix = config["TAG_TO_IX"]
+            embedding_dim = config["EMBEDDING_DIM"]
+            hidden_dim = config["HIDDEN_DIM"]
+            self.model = (
+                config["MODEL"]
+                .value(tag_to_ix, embedding_dim, hidden_dim)
+                .to(self.device)
+            )
+        else:
+            self.model = config["MODEL"].value().to(self.device)
         self.batch_size = config["BATCH_SIZE"]
         self.epochs = config["EPOCHS"]
         self.lr = config["LEARNING_RATE"]
@@ -59,6 +68,7 @@ class NcgModel:
         self.pipeline = config["PIPELINE"]
         self.sampling = config["SAMPLING"]
         self.summary_mode = config["SUMMARY_MODE"]
+        self.weight_decay = config["WEIGHT_DECAY"]
         self.criterion = config["CRITERION"]
 
         print(f"Using model: {self.model_type.name}\n")
@@ -119,6 +129,7 @@ class NcgModel:
                 self.model.parameters(),
                 lr=self.lr,
                 momentum=self.momentum,
+                weight_decay=self.weight_decay,
             )
 
         else:
@@ -161,55 +172,93 @@ class NcgModel:
                     {"vectorizer": tfidf_vect, "classifier": classifier}, outfile
                 )
                 outfile.close()
-            return
 
-        # training of neural models
-        data_loader = self._dataloader(train_data)
-        criterion = self._criterion()
-        optimizer = self._optimizer()
+        elif self.model_type is Model.SciBert_BiLSTM_CRF:
+            optimizer = self._optimizer()
+            print(f"Begin training...")
+            start = datetime.now()
+            for epoch in range(self.epochs):
+                self.model.train()
+                running_loss = 0.0
 
-        print(f"Begin training...")
-        start = datetime.now()
-        for epoch in range(self.epochs):
-            self.model.train()
-            running_loss = 0.0
+                for step, (x, y) in enumerate(train_data):
+                    sentence_in = self.model.prepare_sequence(x.split()).to(self.device)
+                    targets = torch.tensor(
+                        [2] + [self.model.tag_to_ix[tag] for tag in y] + [2],
+                        dtype=torch.long,
+                    ).to(self.device)
 
-            for step, data in enumerate(data_loader):
-                features = data[0].to(self.device)
-                labels = data[1].to(self.device)
+                    self.model.zero_grad()
+                    loss = self.model.neg_log_likelihood(sentence_in, targets)
+                    loss.backward()
+                    optimizer.step()
 
-                # zero the parameter gradients
-                optimizer.zero_grad()
+                    # calculate running loss value
+                    running_loss += loss.item()
 
-                # do forward propagation
-                preds = self.model(features)
+                    # log loss
+                    if self.summary_mode:
+                        wandb.log({"loss": loss})
 
-                # do loss calculation
-                loss = criterion(preds, labels)
+                    # print loss value every 100 steps and reset the running loss
+                    if step % 100 == 99:
+                        print(
+                            f"[{epoch + 1}, {step + 1:{4}}] loss: {running_loss / 100:.{3}}"
+                        )
+                        running_loss = 0.0
 
-                # do backward propagation
-                loss.backward()
+            end = datetime.now()
+            print(f"\nTraining finished in {(end - start).seconds / 60.0} minutes.\n")
+            save_model(self.subtask, self.model, model_name)
 
-                # do parameter optimization step
-                optimizer.step()
+        else:
+            # training of neural models
+            data_loader = self._dataloader(train_data)
+            criterion = self._criterion()
+            optimizer = self._optimizer()
 
-                # calculate running loss value
-                running_loss += loss.item()
+            print(f"Begin training...")
+            start = datetime.now()
+            for epoch in range(self.epochs):
+                self.model.train()
+                running_loss = 0.0
 
-                # log loss
-                if self.summary_mode:
-                    wandb.log({"loss": loss})
+                for step, data in enumerate(data_loader):
+                    features = data[0].to(self.device)
+                    labels = data[1].to(self.device)
 
-                # print loss value every 100 steps and reset the running loss
-                if step % 100 == 99:
-                    print(
-                        f"[{epoch + 1}, {step + 1:{4}}] loss: {running_loss / 100:.{3}}"
-                    )
-                    running_loss = 0.0
-        end = datetime.now()
-        print(f"\nTraining finished in {(end - start).seconds / 60.0} minutes.\n")
+                    # zero the parameter gradients
+                    optimizer.zero_grad()
 
-        save_model(self.subtask, self.model, model_name)
+                    # do forward propagation
+                    preds = self.model(features)
+
+                    # do loss calculation
+                    loss = criterion(preds, labels)
+
+                    # do backward propagation
+                    loss.backward()
+
+                    # do parameter optimization step
+                    optimizer.step()
+
+                    # calculate running loss value
+                    running_loss += loss.item()
+
+                    # log loss
+                    if self.summary_mode:
+                        wandb.log({"loss": loss})
+
+                    # print loss value every 100 steps and reset the running loss
+                    if step % 100 == 99:
+                        print(
+                            f"[{epoch + 1}, {step + 1:{4}}] loss: {running_loss / 100:.{3}}"
+                        )
+                        running_loss = 0.0
+            end = datetime.now()
+            print(f"\nTraining finished in {(end - start).seconds / 60.0} minutes.\n")
+
+            save_model(self.subtask, self.model, model_name)
 
     def test(self, test_data, model_name):
         """
@@ -242,36 +291,76 @@ class NcgModel:
             score = metrics.f1_score(labels, preds)
             print(f"F1 score: {score:.{3}}\n")
 
-            return
+        elif self.model_type is Model.SciBert_BiLSTM_CRF:
+            self.model = load_model(self.subtask, self.model, model_name)
+            total_score = 0.0
 
-        # testing of neural models
-        self.model = load_model(self.subtask, self.model, model_name)
-        # Use default samping method for validation/test data
-        self.sampling = Sampling.SHUFFLE
+            print(f"Begin testing...")
+            self.model.eval()
+            Tp = Fp = Tn = Fn = 0
+            with torch.no_grad():
+                for (x, y) in test_data:
+                    sentence_in = self.model.prepare_sequence(x.split()).to(self.device)
+                    targets = torch.tensor(
+                        [2] + [self.model.tag_to_ix[tag] for tag in y] + [2],
+                        dtype=torch.long,
+                    ).to(self.device)
 
-        data_loader = self._dataloader(test_data)
-        total_score = 0.0
+                    # model output is in the format [score, list of tags]
+                    outputs = self.model(sentence_in)
+                    output_phrases, target_phrases = self.model.predict(
+                        outputs[1], targets
+                    )
 
-        print(f"Begin testing...")
-        self.model.eval()
-        with torch.no_grad():
-            for data in data_loader:
-                features = data[0].to(self.device)
-                labels = data[1].to(self.device)
+                    tp, fp, tn, fn = self.model.evaluate(output_phrases, target_phrases)
+                    batch_score = f1_score(tp, fp, fn)
+                    total_score += batch_score
 
-                outputs = self.model(features)
-                preds = self.model.predict(outputs)
-                tp, fp, _, fn = self.model.evaluate(preds, labels)
-                batch_score = f1_score(tp, fp, fn)
-                total_score += batch_score
+                    Tp += tp
+                    Fp += fp
+                    Tn += tn
+                    Fn += fn
 
-                if self.summary_mode:
-                    wandb.log({"batch_score": batch_score})
+                    if self.summary_mode:
+                        wandb.log({"batch_score": batch_score})
 
-        avg_score = total_score / len(data_loader)
-        if self.summary_mode:
-            wandb.log({"f1_score": avg_score})
-        print(f"F1 score: {avg_score:.{3}}\n")
+            avg_score = total_score / len(test_data)
+            score = f1_score(Tp, Fp, Fn)
+            if self.summary_mode:
+                wandb.log({"f1_score": avg_score})
+            print(
+                f"F1 score (each sentence): {avg_score:.{3}}, F1 score (all phrases): {score:.{3}}\n"
+            )
+
+        else:
+            # testing of neural models
+            self.model = load_model(self.subtask, self.model, model_name)
+            # Use default samping method
+            self.sampling = Sampling.SHUFFLE
+
+            data_loader = self._dataloader(test_data)
+            total_score = 0.0
+
+            print(f"Begin testing...")
+            self.model.eval()
+            with torch.no_grad():
+                for data in data_loader:
+                    features = data[0].to(self.device)
+                    labels = data[1].to(self.device)
+
+                    outputs = self.model(features)
+                    preds = self.model.predict(outputs)
+                    tp, fp, _, fn = self.model.evaluate(preds, labels)
+                    batch_score = f1_score(tp, fp, fn)
+                    total_score += batch_score
+
+                    if self.summary_mode:
+                        wandb.log({"batch_score": batch_score})
+
+            avg_score = total_score / len(data_loader)
+            if self.summary_mode:
+                wandb.log({"f1_score": avg_score})
+            print(f"F1 score: {avg_score:.{3}}\n")
 
 
 def save_model(subtask, model: nn.Module, model_name):

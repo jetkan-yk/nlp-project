@@ -1,6 +1,34 @@
 from torch.utils.data import Dataset
 
 
+def phrase_pos(sentence, start_idx, end_idx):
+    """
+    Convert the phrase's char-level index to word-level index
+    """
+    word_pos = phrase_size = start = end = 0
+    for idx in range(len(sentence)):
+        if sentence[idx] == " ":
+            word_pos += 1
+            if idx > start_idx:
+                phrase_size += 1
+        if idx == start_idx:
+            start = word_pos
+        elif idx == end_idx:
+            end = start + phrase_size
+    return start, end
+
+
+def tag_sent(tags, start, end):
+    """
+    Given a sentence tagging, the idx where a phrase starts, the
+    idx where a phrase ends, updates the sentence's "B", "I", "O" tags
+    """
+    tags[start] = "B"
+    for idx in range(start + 1, end):
+        tags[idx] = "I"
+    return tags
+
+
 class Dataset2(Dataset):
     """
     A `PyTorch Dataset` class that accepts a subtask number and a data directory.
@@ -23,8 +51,17 @@ class Dataset2(Dataset):
         self.y = []
         for idx, phrase_dict in enumerate(self.phrases):
             for sent, phrase in phrase_dict.items():
-                self.x.append((idx, sent))
-                self.y.append(phrase)
+                sentence = self._stringify((idx, sent))
+                self.x.append(sentence)
+
+                # initiaize sentence taggings with all "O"s
+                tags = ["O"] * len(sentence.split(" "))
+                for start_idx, end_idx in phrase:
+                    # convert the phrase's char-level index to word-level index
+                    start, end = phrase_pos(sentence, start_idx, end_idx)
+                    # tag sentence with "B"s and "I"s
+                    tags = tag_sent(tags, start, end)
+                self.y.append(tags)
 
     def __len__(self):
         """
@@ -36,7 +73,7 @@ class Dataset2(Dataset):
         """
         Returns the i-th sample's `(x, y)` tuple
         """
-        return self._stringify(self.x[i]), self._stringify(self.y[i])
+        return self.x[i], self.y[i]
 
     def _stringify(self, data):
         """
