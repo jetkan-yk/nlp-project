@@ -294,12 +294,14 @@ class NcgModel:
                 features = data[0].to(self.device)
                 labels = data[1].to(self.device)
                 
-                outputs = self.model(features)
-                preds = self.model.predict(outputs)
+                
                 if self.model is Model.T5:
+                    preds = self.model.predict(features)
                     precision, recall = self.model.evaluate(preds, labels)
                     total_score += rouge_f1score(precision, recall)
                 else:
+                    outputs = self.model(features)
+                    preds = self.model.predict(outputs)
                     tp, fp, _, fn = self.model.evaluate(preds, labels)
                     batch_score = f1_score(tp, fp, fn)
                     total_score += batch_score
