@@ -65,8 +65,7 @@ class SentenceBertClass(torch.nn.Module):
         doc_output = self.l1(input_ids=doc_ids, attention_mask=doc_mask)
         doc_embeddings = mean_pooling(doc_output, doc_mask)
 
-        # elementwise product of sentence embs and doc embs
-        combined_features = sentence_embeddings * doc_embeddings
+        combined_features = abs(sentence_embeddings - doc_embeddings)  
 
         # concatenate input features and their elementwise product
         concat_features = torch.cat(
