@@ -1,4 +1,6 @@
-# CS4248 G17 NLP Project
+# CS4248 G17 NLP Final Project
+
+By Kan Yip Keng, Lin Mei An, Yang Zi Yun, Yew Kai Zhe
 
 ## About
 
