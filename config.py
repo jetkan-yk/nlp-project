@@ -25,7 +25,7 @@ class NcgConfig:
     Default hyperparameter configs
     """
 
-    BATCH_SIZE = 32
+    BATCH_SIZE = 12
     EPOCHS = 10
     LEARNING_RATE = 0.1
     MODEL = None

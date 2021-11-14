@@ -1,3 +1,4 @@
+import math
 from config import Pipeline
 from torch.utils.data import Dataset
 
@@ -38,14 +39,59 @@ class Dataset1(Dataset):
             # formats data into (article, [contributing sentences])
             #print(self.sents)
             
+            # for idx, sent_list in enumerate(self.sents):
+            #     self.x.append(self._stringify(idx))
+            #     #temp = []
+            #     # for sent in sent_list:
+            #     #     #self.y.append(self._stringify((idx, sent)))
+            #     #     temp.append(self._stringify((idx, sent)))
+            #     # self.y.append(temp)
+            #     self.y.append(sent_list)
+
+            #process data in this manner:
+            #avg no. of tokens / sent = 20
+            #to fit in 512 architecutre ~ 25 sentences per segment cos need add title to the sentence
+            #segment article into parts --> about 25 sentences per segment 
+            #some segments might not have any contributing sentences
+            #should return x = ([CLS] + title + sent + [SEP]) of all 15 sentences concatenated into a flat sent
+            # y = array of length 15 each positioned demarked with 0/1 to show if the sentence is a contributing sentence
+            
             for idx, sent_list in enumerate(self.sents):
-                self.x.append(self._stringify(idx))
-                #temp = []
-                # for sent in sent_list:
-                #     #self.y.append(self._stringify((idx, sent)))
-                #     temp.append(self._stringify((idx, sent)))
-                # self.y.append(temp)
-                self.y.append(sent_list)
+                #stringify article
+                article = self._stringify(idx)
+                #extract title of paper located at index 1
+                #title appended at the start of every segment
+                title = article[1]
+                total_segs = math.ceil(len(article)/25)
+                
+                for i in range(0, total_segs):
+                    seg = []
+                    labels = []
+                    for j in range(0, 25):
+                        #check if its in the last segment
+                        sent_idx = i * 25 + j
+                        if sent_idx < len(article):
+                            # processed_sent = '[CLS] ' + article[sent_idx]  + ' [SEP]'
+                            # seg.append(processed_sent)
+                            seg.append(article[sent_idx])
+                            #if is contributing sentence, label as 1 else as 0
+                            #labels.append(1 if sent_idx in sent_list else 0)
+                            
+                            #if is contributing sentence, add idx to labels
+                            #index re positioned to start at 0 respective to the article segment
+                            if sent_idx in sent_list:
+                                labels.append(self._stringify((idx, sent_idx)))
+                    #append title of paper to the start
+                    #output is as such: x is a list of sentences with title as the first sent in the segment
+                    #y is a list of all the indexes in this segment that are contributing sentences --> zeroed relatively to the index
+                    seg.append(title)
+
+                    #if length of labels = 0 then skip over the segment cos it does not have any contributing sentences
+                    if len(labels) != 0:
+                        self.x.append(seg)
+                        #print(labels)
+                        self.y.append(' '.join(labels))
+                    
 
     def __len__(self):
         """

@@ -75,7 +75,10 @@ class NcgModel:
             )
 
     def _criterion(self):
-        return nn.CrossEntropyLoss()
+        if self.config.PIPELINE == Pipeline.SUMMARISATION:
+            return nn.MSELoss()
+        else:
+            return nn.CrossEntropyLoss()
 
     def _optimizer(self):
         if self.config.OPTIMIZER is Optimizer.ADAM:
@@ -106,27 +109,41 @@ class NcgModel:
                 labels = data[1].to(self.device)
 
                 # zero the parameter gradients
+                print('here')
                 optimizer.zero_grad()
 
                 # do forward propagation
+                print('and then here')
                 preds = self.model(features)
 
                 # do loss calculation
-                loss = criterion(preds, labels)
+                print('calc loss')
+                if self.config.PIPELINE == Pipeline.SUMMARISATION:
+                    loss = preds[0]
 
-                # do backward propagation
-                loss.backward()
+                    #do backward propagation
+                    loss.mean().backward()
+                    
+                    # do parameter optimization step
+                    optimizer.step()
+                else:
+                    loss = criterion(preds, labels)
+                    
+                    #do backward propagation
+                    loss.backward()
+                    # calculate running loss value
 
-                # do parameter optimization step
-                optimizer.step()
+                    # do parameter optimization step
+                    optimizer.step()
 
-                # calculate running loss value
-                running_loss += loss.item()
+                    # calculate running loss value
+                    running_loss += loss.item()
 
                 # print loss value every 100 steps and reset the running loss
                 if step % 100 == 99:
                     print(
-                        f"[{epoch + 1}, {step + 1:{4}}] loss: {running_loss / 100:.{3}}"
+                        #f"[{epoch + 1}, {step + 1:{4}}] loss: {running_loss / 100:.{3}}"
+                        f"[{epoch + 1}, {step + 1:{4}}] loss: {str(loss)}"
                     )
                     running_loss = 0.0
         end = datetime.now()
@@ -148,9 +165,13 @@ class NcgModel:
             for data in data_loader:
                 features = data[0].to(self.device)
                 labels = data[1].to(self.device)
-
+                print("labels:")
+                print(labels)
+                
                 outputs = self.model(features)
                 preds = self.model.predict(outputs)
+                print("preds:")
+                print(preds)
                 batch_score += evaluate(preds, labels)
 
         print(f"Accuracy: {batch_score / len(data_loader):.{3}}\n")
